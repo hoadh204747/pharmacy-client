@@ -3,8 +3,6 @@
         <div>
             <Header />
             <Navbar/>
-            <Banner />
-            <CarouselCategory />
             <div class="py-3 w-6xl mr-auto ml-auto">
                 <router-view></router-view>
             </div>
@@ -13,10 +11,8 @@
 </template>
 
 <script setup lang="ts">
-import Banner from '@/components/Banner/Banner.vue';
 import Header from '@/components/Header/Header.vue';
 import Navbar from '@/components/Navbar/Navbar.vue';
-import CarouselCategory from '@/components/CarouselCategory/index.vue';
 </script>
 
 <style scoped>

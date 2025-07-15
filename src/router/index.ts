@@ -1,5 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
+import DetailLayout from '@/layouts/DetailLayout.vue'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { loadLayoutMiddleware } from './middleware'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,8 +11,27 @@ const router = createRouter({
       path: '/',
       name: 'home',
       component: HomeView,
+      meta: {
+        layout: AppLayout,
+        title: 'Home - Pharmacy Management System',
+      }
     },
+    {
+      path: '/products',
+      name: 'products',
+      component: () => import('../views/Products/ProductsView.vue'),
+      meta: {
+        layout: DetailLayout,
+        title: 'Products - Pharmacy Management System',
+      }
+    }
   ],
 })
+
+router.beforeEach(loadLayoutMiddleware)
+router.beforeEach((to, from, next) => {
+  document.title = to.meta.title || 'Default Title';
+  next();
+});
 
 export default router

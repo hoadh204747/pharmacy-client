@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import AppLayout from './layouts/AppLayout.vue';
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 </script>
 
 <template>
-  <AppLayout/>
+  <component :is="route.meta?.layout">
+    <slot></slot>
+  </component>
 </template>
 
 <style>
