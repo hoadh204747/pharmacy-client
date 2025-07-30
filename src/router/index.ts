@@ -14,7 +14,7 @@ const router = createRouter({
       meta: {
         layout: AppLayout,
         title: 'Home - Pharmacy Management System',
-      }
+      },
     },
     {
       path: '/products',
@@ -23,15 +23,33 @@ const router = createRouter({
       meta: {
         layout: DetailLayout,
         title: 'Products - Pharmacy Management System',
-      }
-    }
+      },
+    },
+    {
+      path: '/products/:id',
+      name: 'product-detail',
+      component: () => import('@/views/Products/_id/ProductView.vue'),
+      meta: {
+        layout: DetailLayout,
+        title: 'Product Detail - Pharmacy Management System',
+      },
+    },
+    {
+      path: '/cart',
+      name: 'cart',
+      component: () => import('@/views/Cart/CartView.vue'),
+      meta: {
+        layout: DetailLayout,
+        title: 'Cart - Pharmacy Management System',
+      },
+    },
   ],
 })
 
 router.beforeEach(loadLayoutMiddleware)
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'Default Title';
-  next();
-});
+  document.title = to.meta.title || 'Default Title'
+  next()
+})
 
 export default router
