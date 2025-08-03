@@ -20,6 +20,7 @@
     "@tailwindcss/vite": "^4.1.10",
     "ant-design-vue": "^4.2.6",
     "pinia": "^3.0.1",
+    "primeicons": "^7.0.0",
     "primevue": "^4.3.5",
     "swiper": "^11.2.10",
     "tailwindcss": "^4.1.10",
