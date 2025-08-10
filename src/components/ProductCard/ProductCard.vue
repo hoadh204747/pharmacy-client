@@ -3,15 +3,20 @@
         class="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all m-2 p-3 border border-gray-200 flex flex-col items-center h-full">
         <!-- Image -->
         <div class="w-28 h-28 sm:w-32 sm:h-32 overflow-hidden rounded-md">
-            <img class="object-cover w-full h-full transition-transform group-hover:scale-105"
-                :src="data.image" alt="Product" />
+            <img class="object-cover w-full h-full transition-transform group-hover:scale-105" :src="data.image"
+                alt="Product" />
         </div>
 
         <!-- Info -->
         <div class="mt-3 w-full text-center flex-1 flex flex-col justify-between">
-            <p class="text-sm font-semibold text-gray-800 line-clamp-2 h-10" v-tooltip="data.name">
-                {{ data.name }}
-            </p>
+            <Tooltip>
+                <template v-slot:title>
+                    {{ data.name }}
+                </template>
+                <p class="text-sm font-semibold text-gray-800 line-clamp-2 h-10">
+                    {{ data.name }}
+                </p>
+            </Tooltip>
 
             <div class="text-sm text-gray-600 mt-1 space-y-0.5">
                 <p>Price: 100.000đ</p>
@@ -25,9 +30,14 @@
                     <span>Ready</span>
                 </div>
                 <div class="text-gray-600 hover:text-green-600 cursor-pointer" title="Add to cart">
-                    <div v-tooltip="'Add to cart'" class="cursor-pointer text-gray-600 hover:text-green-600">
-                        <ShoppingCartOutlined />
-                    </div>
+                    <Tooltip>
+                        <template v-slot:title>
+                            Add to cart
+                        </template>
+                        <span class="cursor-pointer text-gray-600 hover:text-green-600">
+                            <ShoppingCartOutlined />
+                        </span>
+                    </Tooltip>
                 </div>
             </div>
         </div>
@@ -36,6 +46,7 @@
 
 <script setup lang="ts">
 import { CheckOutlined, ShoppingCartOutlined } from '@ant-design/icons-vue';
+import Tooltip from '@/components/common/tooltip/index.vue';
 
 const props = defineProps<{
     data: {

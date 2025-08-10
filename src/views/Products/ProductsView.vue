@@ -3,9 +3,23 @@
         <div class="filter">
             <Filter />
         </div>
-        <div class="products">
-            <div v-for="item in items" class="product">
-                <ProductCard :data="item"/>
+        <div>
+            <div class="flex justify-between items-center gap-2 p-3">
+                <div>
+                    <span class="font-extrabold text-xl">Danh sách sản phẩm</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="font-extrabold">Sắp xếp theo: </span>
+                    <div class="flex gap-2">
+                        <a-button size="small" type="primary">Giá giảm dần</a-button>
+                        <a-button size="small" type="primary">Giá tăng dần</a-button>
+                    </div>
+                </div>
+            </div>
+            <div class="products">
+                <div v-for="item in items" class="product">
+                    <ProductCard :data="item" />
+                </div>
             </div>
         </div>
     </div>
@@ -31,8 +45,8 @@ const items = Array.from({ length: 12 }).map((_, i) => ({
 }
 
 .filter {
-    background-color: #f1f1f1;
-    border: 1px solid #ccc;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    border-radius: 8px;
     padding: 12px;
 }
 
