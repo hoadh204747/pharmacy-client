@@ -17,7 +17,7 @@ const router = createRouter({
       },
     },
     {
-      path: '/products',
+      path: '/products/by-category/:categoryId',
       name: 'products',
       component: () => import('../views/Products/ProductsView.vue'),
       meta: {
@@ -41,6 +41,15 @@ const router = createRouter({
       meta: {
         layout: DetailLayout,
         title: 'Cart - Pharmacy Management System',
+      },
+    },
+    {
+      path: '/checkout',
+      name: 'checkout',
+      component: () => import('@/views/Checkout/CheckoutView.vue'),
+      meta: {
+        layout: DetailLayout,
+        title: 'Checkout - Pharmacy Management System',
       },
     },
   ],

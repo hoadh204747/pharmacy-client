@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="products">
-                <div v-for="item in items" class="product">
+                <div v-for="item in data" class="product">
                     <ProductCard :data="item" />
                 </div>
             </div>
@@ -26,14 +26,24 @@
 </template>
 
 <script setup lang="ts">
+import type { IGetProductResponse } from '@/api/models/product';
+import { ProductService } from '@/api/services/product';
 import Filter from '@/components/Filter/Filter.vue';
 import ProductCard from '@/components/ProductCard/ProductCard.vue';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
-const items = Array.from({ length: 12 }).map((_, i) => ({
-    name: `Item ${i + 1} - Dược phẩm chăm sóc sức khoẻ hằng ngày chất lượng cao`,
-    image:
-        'https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/ecommerce/20250415090446-0-P03074.jpg',
-}));
+const route = useRoute();
+const data = ref<IGetProductResponse[]>([]);
+
+const getAllProductsByCategory = async () => {
+    const res = await ProductService.getProductsByCategory(Number(route.params.categoryId));
+    data.value = res.content;
+}
+
+onMounted(() => {
+    getAllProductsByCategory();
+});
 </script>
 
 <style scoped>

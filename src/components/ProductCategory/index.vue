@@ -8,7 +8,7 @@
             </div>
 
             <!-- Carousel -->
-            <Carousel :value="items" :numVisible="numVisible" :numScroll="numScroll"
+            <Carousel :value="props.data" :numVisible="numVisible" :numScroll="numScroll"
                 :responsiveOptions="responsiveOptions">
                 <template #item="slotProps">
                     <ProductCard :data="slotProps.data" />
@@ -22,17 +22,14 @@
 import Carousel from 'primevue/carousel';
 import ProductCard from '@/components/ProductCard/ProductCard.vue';
 import { ref } from 'vue';
+import type { IGetProductResponse } from '@/api/models/product';
 
-const items = Array.from({ length: 12 }).map((_, i) => ({
-    name: `Item ${i + 1} - Dược phẩm chăm sóc sức khoẻ hằng ngày chất lượng cao`,
-    image:
-        'https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/ecommerce/20250415090446-0-P03074.jpg',
-}));
+const props = defineProps<{
+    data: IGetProductResponse[];
+}>();
 
 const numVisible = 5;
 const numScroll = 3;
-
-// Responsive hiển thị số lượng khác nhau theo màn hình
 const responsiveOptions = [
     {
         breakpoint: '1400px',
@@ -63,7 +60,6 @@ const responsiveOptions = [
 </script>
 
 <style scoped>
-/* Cần thiết nếu bạn muốn line-clamp làm việc */
 .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;

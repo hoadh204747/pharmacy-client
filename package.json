@@ -19,6 +19,7 @@
     "@primeuix/themes": "^1.1.2",
     "@tailwindcss/vite": "^4.1.10",
     "ant-design-vue": "^4.2.6",
+    "axios": "^1.12.2",
     "pinia": "^3.0.1",
     "primeicons": "^7.0.0",
     "primevue": "^4.3.5",

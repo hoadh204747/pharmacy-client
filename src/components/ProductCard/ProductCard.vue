@@ -1,9 +1,10 @@
 <template>
-    <div
+    <div @click="() => router.push({ name: 'product-detail', params: { id: data.id } })
+    "
         class="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all m-2 p-3 border border-gray-200 flex flex-col items-center h-full">
         <!-- Image -->
         <div class="w-28 h-28 sm:w-32 sm:h-32 overflow-hidden rounded-md">
-            <img class="object-cover w-full h-full transition-transform group-hover:scale-105" :src="data.image"
+            <img class="object-cover w-full h-full transition-transform group-hover:scale-105" :src="data.imageUrl[0]"
                 alt="Product" />
         </div>
 
@@ -19,8 +20,8 @@
             </Tooltip>
 
             <div class="text-sm text-gray-600 mt-1 space-y-0.5">
-                <p>Price: 100.000đ</p>
-                <p>Sale: 10%</p>
+                <p>Price: {{ data.price }} đ</p>
+                <p>Sale: {{ data.sale }} %</p>
             </div>
 
             <!-- Actions -->
@@ -47,11 +48,23 @@
 <script setup lang="ts">
 import { CheckOutlined, ShoppingCartOutlined } from '@ant-design/icons-vue';
 import Tooltip from '@/components/common/tooltip/index.vue';
+import router from '@/router';
 
 const props = defineProps<{
     data: {
-        name: string;
-        image: string;
+        id: number
+        name: string
+        slug: string
+        description: string
+        imageUrl: string[]
+        price: number
+        discount: number
+        amount: number
+        sold: number
+        sale: boolean
+        //brandId: number,
+        createdAt: string
+        updatedAt: string
     };
 }>();
 </script>

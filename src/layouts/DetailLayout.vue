@@ -1,8 +1,8 @@
 <template>
     <a-config-provider :theme="{ token: { colorPrimary: '#52c41a' } }">
-        <div>
+        <div style="background-color: #edf0f3;">
             <Header />
-            <Navbar/>
+            <Navbar />
             <div class="py-3 w-6xl mr-auto ml-auto">
                 <router-view></router-view>
             </div>
@@ -15,6 +15,4 @@ import Header from '@/components/Header/Header.vue';
 import Navbar from '@/components/Navbar/Navbar.vue';
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

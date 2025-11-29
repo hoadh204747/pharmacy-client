@@ -2,8 +2,8 @@
   <div class="product-view">
     <div class="product-left">
       <div class="product-description">
-        <Swiper :images="images" />
-        <MainInfo :product="product" />
+        <Swiper :images="data.imageUrl" />
+        <MainInfo :product="data" />
       </div>
     </div>
     <div class="product-right">
@@ -41,36 +41,31 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script setup lang="ts">
+import { ref, onMounted } from 'vue';
 import Swiper from '@/components/Product/Swiper/Swiper.vue';
 import MainInfo from '@/components/Product/MainInfo/index.vue';
-
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons-vue';
+import { ProductService } from '@/api/services/product';
+import { useRoute } from 'vue-router';
+import type { IGetProductResponse } from '@/api/models/product';
 
-const images = [
-  "https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/promotion_sku_images/20250619040558-0-P20532.png?versionId=kKArLfoOBv4tAr9KolRc_QZs0jstMJ0Z",
-  "https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/ecommerce/P20532_1.jpg",
-  "https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/ecommerce/P20532_3.jpg",
-  "https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/ecommerce/P20532_4.jpg",
-  "https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/ecommerce/P20532_5.jpg"
-];
+const route = useRoute();
+const data = ref<IGetProductResponse>({} as IGetProductResponse);
 
-const product = ref({
-  brand: 'Brauer',
-  name: 'Sữa bột dinh dưỡng PEDIASURE hương vani bổ sung dinh dưỡng cho bé từ 1-10 tuổi (1.6Kg)',
-  sold: 555,
-  reviews: 100,
-  comments: 100,
-  rating: 5.0,
-  originalPrice: '1.185.000 ₫',
-  discountPrice: '1.089.000 ₫',
+const getProductDetail = async () => {
+  const res = await ProductService.getProductById(Number(route.params.id));
+  data.value = res;
+};
+onMounted(() => {
+  getProductDetail();
 });
 
 </script>
 
 <style scoped>
 .product-view {
+  background-color: #fff;
   display: grid;
   grid-template-columns: min(74%, calc(888rem/16)) 1fr;
   gap: 32px;
@@ -90,8 +85,8 @@ const product = ref({
   flex-direction: column;
   justify-content: center;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
   padding: 32px 24px;
 }
 
