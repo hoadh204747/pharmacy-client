@@ -46,61 +46,88 @@ function onSlideChange(swiper: any) {
 <style scoped>
 .swiper {
     width: 100%;
-    max-width: 280px;
-    height: 360px;
-    margin: 0 auto;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    height: auto;
+    aspect-ratio: 1 / 1;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .swiper-slide {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 16px;
-    background: #f3f4f6;
+    background: white;
+    border-radius: 12px;
 }
 
 .swiper-slide img {
-    width: 90%;
-    height: 90%;
-    object-fit: cover;
-    border-radius: 12px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.07);
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 16px;
 }
 
 /* Thumbnails */
 .thumb-list {
     display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin-top: 16px;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
 }
 
 .thumb {
-    border: 2px solid transparent;
+    border: 2px solid #e5e7eb;
     border-radius: 8px;
-    padding: 2px;
-    background: #fff;
+    padding: 0;
+    background: white;
     cursor: pointer;
-    transition: border 0.2s;
-    width: 48px;
-    height: 48px;
+    transition: all 0.3s ease;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
 .thumb img {
-    width: 40px;
-    height: 40px;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 6px;
+}
+
+.thumb:hover {
+    border-color: #a78bfa;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2);
 }
 
 .thumb.active {
-    border-color: #32d13a;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+    background: #f3f4f6;
+}
+
+/* Scrollbar */
+.thumb-list::-webkit-scrollbar {
+    height: 4px;
+}
+
+.thumb-list::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+
+.thumb-list::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.thumb-list::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
 }
 </style>

@@ -6,11 +6,11 @@
                     <h3 class="text-2xl font-bold">Giỏ hàng (3)</h3>
                     <a-popconfirm title="Are you sure delete all?" ok-text="Yes" cancel-text="No" @confirm="confirm"
                         @cancel="cancel">
-                        <button class="text-green-600 cursor-pointer">Xóa</button>
+                        <button class="text-purple-600 cursor-pointer">Xóa</button>
                     </a-popconfirm>
                 </div>
                 <div class="grid gap-2 md:gap-6">
-                    <div class="mt-4 p-4 bg-[rgb(255,241,184)] rounded">
+                    <div class="mt-4 p-4 free-shipping rounded">
                         <p>Miễn phí vận chuyển cho mọi đơn hàng từ 0đ</p>
                     </div>
                     <div class="grid gap-4">
@@ -27,7 +27,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="bg-[hsl(0,0%,82%)] h-[1px] hidden w-full md:block"></div>
+                        <div class="divider-line hidden w-full md:block"></div>
                         <!-- item1 -->
                         <CartItem v-for="(item, idx) in cartItems" :key="item.id" :checked="item.checked"
                             :name="item.name" :image="item.image" :link="item.link" :price="item.price"
@@ -125,29 +125,128 @@ function updateTotal(idx: number) {
 <style scoped>
 .cart-view {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+    grid-template-columns: 1fr 320px;
     gap: 24px;
-    padding: 16px;
+    padding: 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+    background: #fbf7ff;
+    min-height: calc(100vh - 200px);
 }
 
-.cart-right {
-    border-radius: 8px;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
-}
-
+/* Left panel */
 .cart-left {
-    border-radius: 8px;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.06);
+    overflow: hidden;
+    border: 1px solid #f3e8ff;
 }
 
-/* Responsive: dưới 768px chuyển sang 1 cột */
-@media (max-width: 768px) {
+.cart-left>div {
+    padding: 24px;
+}
+
+/* Free shipping box */
+.free-shipping {
+    background: linear-gradient(135deg, #f5f3ff 0%, #f3e8ff 100%);
+    border: 1px solid #e9d5ff;
+    color: #5b21b6;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* Divider line between header and items */
+.divider-line {
+    height: 1px;
+    background: #efe6ff;
+    margin: 8px 0 0 0;
+}
+
+/* Right summary panel */
+.cart-right {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.06);
+    border: 1px solid #f3e8ff;
+    height: fit-content;
+    position: sticky;
+    top: 100px;
+    padding: 20px;
+}
+
+/* Headings and small text */
+.cart-left h3 {
+    color: #4c1d95;
+}
+
+.cart-left p,
+.cart-left .text-sm {
+    color: #4c1d95;
+}
+
+/* Buttons and links */
+.cart-left button {
+    color: #7c3aed;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.cart-left button:hover {
+    color: #6d28d9;
+    text-decoration: underline;
+}
+
+/* Checkbox styling for Antd (scoped deep selector) */
+.cart-left :deep(.ant-checkbox) {
+    --ant-primary-color: #8b5cf6;
+}
+
+.cart-left :deep(.ant-checkbox-inner) {
+    border-radius: 4px;
+}
+
+.cart-left :deep(.ant-checkbox-checked .ant-checkbox-inner) {
+    background-color: #8b5cf6;
+    border-color: #8b5cf6;
+}
+
+/* Cart item separator */
+.cart-left :deep(.cart-item-separator) {
+    background: #f3e8ff;
+}
+
+/* Product totals text */
+.cart-left :deep(.text-neutral-900) {
+    color: #2d0b45;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
     .cart-view {
         grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 16px;
     }
 
     .cart-right {
-        margin-top: 16px;
+        position: static;
+        top: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .cart-view {
+        padding: 12px;
+        gap: 16px;
+    }
+
+    .cart-left>div {
+        padding: 16px;
+    }
+
+    .cart-right {
+        padding: 16px !important;
     }
 }
 </style>

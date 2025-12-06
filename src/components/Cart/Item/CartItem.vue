@@ -52,9 +52,9 @@
         </div>
         <a-popconfirm title="Are you sure delete this product?" ok-text="Yes" cancel-text="No" @confirm="onDelete"
             @cancel="onCancel">
-            <button>
-                <i class="pi pi-trash text-green-500"></i>
-            </button>
+            <abutton>
+                <i class="pi pi-trash text-violet-500 cursor-pointer"></i>
+            </abutton>
         </a-popconfirm>
     </div>
 </template>

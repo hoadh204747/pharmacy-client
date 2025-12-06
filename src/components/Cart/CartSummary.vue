@@ -4,11 +4,11 @@
             <div class="bg-white p-4 rounded-sm">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center space-x-2">
-                        <i class="pi pi-receipt text-green-500"></i>
+                        <i class="pi pi-receipt text-violet-500"></i>
                         <span>Khuyến mãi</span>
                     </div>
                     <div>
-                        <button @click="$emit('showDrawer')" class="text-green-600 cursor-pointer">Chọn mã</button>
+                        <button @click="$emit('showDrawer')" class="text-violet-500 cursor-pointer">Chọn mã</button>
                     </div>
                 </div>
             </div>

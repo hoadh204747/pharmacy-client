@@ -7,9 +7,12 @@ export class ProductService {
 
   public static readonly getProductsByCategory: (
     categoryId: number,
-  ) => Promise<IPageResponse<IGetProductResponse>> = async (categoryId) =>
+    params?: Record<string, any>,
+  ) => Promise<IPageResponse<IGetProductResponse>> = async (categoryId, params) =>
     axiosInstance
-      .get<IPageResponse<IGetProductResponse>>(`/products/by-category/${categoryId}`)
+      .get<IPageResponse<IGetProductResponse>>(`/products/by-category/${categoryId}`, {
+        params,
+      })
       .then((res) => res.data)
 
   public static readonly getProductById: (id: number) => Promise<IGetProductResponse> = async (

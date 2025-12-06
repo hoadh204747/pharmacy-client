@@ -1,7 +1,7 @@
 <template>
     <div class="products-wrapper">
-        <div class="filter">
-            <Filter />
+        <div class="filter bg-white">
+            <Filter v-model:filters="filters" />
         </div>
         <div>
             <div class="flex justify-between items-center gap-2 p-3">
@@ -11,8 +11,8 @@
                 <div class="flex items-center gap-2">
                     <span class="font-extrabold">Sắp xếp theo: </span>
                     <div class="flex gap-2">
-                        <a-button size="small" type="primary">Giá giảm dần</a-button>
-                        <a-button size="small" type="primary">Giá tăng dần</a-button>
+                        <a-button size="small" type="primary" @click="setSort('desc')">Giá giảm dần</a-button>
+                        <a-button size="small" type="primary" @click="setSort('asc')">Giá tăng dần</a-button>
                     </div>
                 </div>
             </div>
@@ -26,24 +26,51 @@
 </template>
 
 <script setup lang="ts">
-import type { IGetProductResponse } from '@/api/models/product';
-import { ProductService } from '@/api/services/product';
-import Filter from '@/components/Filter/Filter.vue';
-import ProductCard from '@/components/ProductCard/ProductCard.vue';
-import { onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
+import type { IGetProductResponse } from '@/api/models/product'
+import { ProductService } from '@/api/services/product'
+import Filter from '@/components/Filter/Filter.vue'
+import ProductCard from '@/components/ProductCard/ProductCard.vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
-const route = useRoute();
-const data = ref<IGetProductResponse[]>([]);
+const route = useRoute()
+const data = ref<IGetProductResponse[]>([])
+const filters = ref<Record<string, any>>({})
+const brands = ref<number[]>([])
+const sort = ref<string | null>(null)
+const page = ref(0)
+const size = ref(20)
+
 
 const getAllProductsByCategory = async () => {
-    const res = await ProductService.getProductsByCategory(Number(route.params.categoryId));
-    data.value = res.content;
+    const categoryId = Number(route.params.categoryId)
+    const res = await ProductService.getProductsByCategory(categoryId, {
+        brandIds: filters.value.brands,
+        minPrice: filters.value.priceFrom,
+        maxPrice: filters.value.priceTo,
+        sortDirection: sort.value
+    })
+    data.value = res.content
 }
 
+function setSort(value: string | null) {
+    sort.value = value
+    page.value = 0
+    getAllProductsByCategory()
+}
+
+watch(
+    [filters, sort, () => route.params.categoryId],
+    () => {
+        page.value = 0
+        getAllProductsByCategory()
+    },
+    { deep: true },
+)
+
 onMounted(() => {
-    getAllProductsByCategory();
-});
+    getAllProductsByCategory()
+})
 </script>
 
 <style scoped>
@@ -55,8 +82,14 @@ onMounted(() => {
 }
 
 .filter {
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    position: sticky;
+    top: 16px;
+    height: calc(100vh - 0px);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    background: white;
     border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     padding: 12px;
 }
 
