@@ -6,14 +6,16 @@
                 <img :src="image" alt="" loading="lazy" :srcset="srcset" class="w-full h-full object-cover" />
             </a>
         </div>
-        <div class="flex-1 flex items-center min-w-0">
-            <a :href="link" class="font-semibold text-base text-gray-900 flex-1 min-w-0 truncate">
-                {{ name }}
-            </a>
-            <span class="ml-4 text-sm font-medium text-gray-700 whitespace-nowrap text-right w-12">
+        <div class="flex-1 flex items-center gap-3 min-w-0">
+            <a-tooltip :title="name" placement="top">
+                <a :href="link" class="product-name">
+                    {{ name }}
+                </a>
+            </a-tooltip>
+            <span class="quantity-badge">
                 x{{ quantity }}
             </span>
-            <span class="ml-4 text-sm font-bold text-red-500 whitespace-nowrap text-right w-20">
+            <span class="total-price">
                 {{ total }}
             </span>
         </div>
@@ -21,6 +23,8 @@
 </template>
 
 <script setup lang="ts">
+import { Tooltip as ATooltip } from 'ant-design-vue';
+
 const props = defineProps<{
     name: string;
     image: string;
@@ -32,4 +36,91 @@ const props = defineProps<{
 }>();
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Product name with ellipsis */
+.product-name {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    font-size: 14px;
+    color: #111827;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+}
+
+.product-name:hover {
+    color: #8b5cf6;
+}
+
+/* Quantity badge */
+.quantity-badge {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    white-space: nowrap;
+    padding: 2px 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+
+/* Total price */
+.total-price {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ef4444;
+    white-space: nowrap;
+    text-align: right;
+    min-width: 80px;
+}
+
+/* Tooltip styling */
+:deep(.ant-tooltip-inner) {
+    background: #1f2937;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+:deep(.ant-tooltip-arrow-content) {
+    background-color: #1f2937;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-name {
+        font-size: 13px;
+    }
+
+    .quantity-badge {
+        font-size: 12px;
+        padding: 2px 6px;
+    }
+
+    .total-price {
+        font-size: 12px;
+        min-width: 70px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-name {
+        font-size: 12px;
+    }
+
+    .quantity-badge {
+        display: none;
+    }
+
+    .total-price {
+        font-size: 11px;
+        min-width: 60px;
+    }
+}
+</style>

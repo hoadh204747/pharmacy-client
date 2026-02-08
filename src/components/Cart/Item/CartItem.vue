@@ -5,7 +5,7 @@
         <div class="grid grid-cols-[calc(68rem/16)_1fr] items-start gap-2">
             <div class="relative h-[calc(68rem/16)] w-[calc(68rem/16)] rounded-sm border border-neutral-100">
                 <a :href="link">
-                    <img class="object-fit" :src="image" alt="" loading="lazy" width="500" height="500" :srcset="srcset"
+                    <img class="object-fit" :src="image" alt="" loading="lazy" width="500" height="500"
                         sizes="(min-width: 769px) 129px, 96px">
                 </a>
             </div>
@@ -17,7 +17,8 @@
                 </div>
                 <div class="flex h-fit items-center justify-between space-x-4 md:justify-center">
                     <div class="flex flex-col justify-center md:w-[calc(160rem/16)] md:flex-row md:space-x-1">
-                        <p class="text-base font-semibold md:text-sm text-neutral-900">{{ price }}</p>
+                        <p class="text-base font-semibold md:text-sm text-neutral-900">{{ formatPrice(props.price) }}
+                        </p>
                     </div>
                     <div
                         class="flex w-[calc(117rem/16)] items-center justify-end self-end md:justify-center md:self-center">
@@ -45,7 +46,8 @@
                         </div>
                     </div>
                     <div class="hidden w-[calc(120rem/16)] items-center justify-end md:flex">
-                        <p class="text-base font-semibold md:text-sm text-neutral-900">{{ total }}</p>
+                        <p class="text-base font-semibold md:text-sm text-neutral-900">{{ formatPrice(props.total) }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -62,16 +64,16 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { PlusOutlined, MinusOutlined } from '@ant-design/icons-vue';
+import { formatPrice } from '@/utils/format';
 
 const props = defineProps<{
     checked: boolean;
     name: string;
     image: string;
     link: string;
-    price: string;
+    price: number;
     quantity: number;
-    total: string;
-    srcset?: string;
+    total: number;
 }>();
 
 const emit = defineEmits(['toggle', 'increase', 'decrease', 'delete', 'cancel']);

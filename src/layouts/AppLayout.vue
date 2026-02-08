@@ -1,12 +1,13 @@
 <template>
     <a-config-provider :theme="{ token: { colorPrimary: '#8b5cf6' } }">
         <div>
+            <Advertisement />
             <Header />
             <Navbar :categories="categories" />
             <Banner />
-            <CarouselCategory />
-            <FlashSale />
-            <div class="py-3 w-6xl mr-auto ml-auto">
+            <!-- <CarouselCategory /> -->
+            <!-- <FlashSale /> -->
+            <div class="py-3 w-6xl mr-auto ml-auto bg-fuchsia-100 my-6 rounded-lg">
                 <router-view></router-view>
             </div>
             <Footer />
@@ -17,6 +18,7 @@
 <script setup lang="ts">
 import Banner from '@/components/Banner/Banner.vue';
 import Header from '@/components/Header/Header.vue';
+import Advertisement from '@/components/Advertisement/index.vue';
 import Navbar from '@/components/Navbar/Navbar.vue';
 import Footer from '@/components/Footer/Footer.vue';
 import FlashSale from '@/components/FlashSale/FlashSale.vue';

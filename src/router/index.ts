@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import DetailLayout from '@/layouts/DetailLayout.vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import { loadLayoutMiddleware } from './middleware'
+import NoneLayout from '@/layouts/NoneLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,7 +18,7 @@ const router = createRouter({
       },
     },
     {
-      path: '/products/by-category/:categoryId',
+      path: '/:categoryId/products',
       name: 'products',
       component: () => import('../views/Products/ProductsView.vue'),
       meta: {
@@ -44,13 +45,51 @@ const router = createRouter({
       },
     },
     {
-      path: '/checkout',
+      path: '/check-out',
       name: 'checkout',
       component: () => import('@/views/Checkout/CheckoutView.vue'),
       meta: {
         layout: DetailLayout,
         title: 'Checkout - Pharmacy Management System',
       },
+    },
+    {
+      path: '/ca-nhan',
+      name: 'personal-info',
+      component: () => import('@/views/Personal/index.vue'),
+      children: [
+        {
+          path: 'thong-tin',
+          name: 'personal-info-detail',
+          component: () => import('@/views/Personal/Information/index.vue'),
+          meta: {
+            layout: DetailLayout,
+            title: 'Personal Information - Pharmacy Management System',
+          },
+        },
+        {
+          path: 'don-hang',
+          name: 'personal-orders',
+          component: () => import('@/views/Personal/MyOrder/index.vue'),
+          meta: {
+            layout: DetailLayout,
+            title: 'Personal Orders - Pharmacy Management System',
+          },
+        },
+      ],
+    },
+    {
+      path: '/error',
+      name: 'Error',
+      component: () => import('@/views/Error/ErrorView.vue'),
+      meta: {
+        layout: NoneLayout,
+        title: 'Error',
+      },
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/error?status_code=404',
     },
   ],
 })

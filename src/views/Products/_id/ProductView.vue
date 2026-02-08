@@ -27,12 +27,12 @@
 
       <!-- Action Buttons -->
       <div class="flex flex-col gap-3 py-6 border-b border-gray-200">
-        <a-button type="primary" size="large"
+        <a-button type="primary" size="large" @click="buyNow"
           class="w-full font-semibold text-base h-12 rounded-lg bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 border-0">
           <i class="pi pi-bolt mr-2"></i>
           Mua ngay
         </a-button>
-        <a-button size="large"
+        <a-button size="large" @click="addToCart"
           class="w-full font-semibold text-base h-12 rounded-lg border-2 border-purple-600 text-purple-600 hover:bg-purple-50">
           <i class="pi pi-shopping-cart mr-2"></i>
           Thêm vào giỏ hàng
@@ -83,11 +83,19 @@ import MainInfo from '@/components/Product/MainInfo/index.vue';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { ProductService } from '@/api/services/product';
 import { useRoute } from 'vue-router';
+import { message } from 'ant-design-vue';
 import type { IGetProductResponse } from '@/api/models/product';
 
 const route = useRoute();
 const data = ref<IGetProductResponse>({} as IGetProductResponse);
 const quantity = ref(1);
+
+const CART_KEY = 'pharmacy_cart';
+
+interface CartItem extends IGetProductResponse {
+  cartQuantity: number;
+  addedAt: number;
+}
 
 const getProductDetail = async () => {
   const res = await ProductService.getProductById(Number(route.params.id));
@@ -106,10 +114,71 @@ const increaseQuantity = () => {
   }
 };
 
+// Get cart from localStorage
+const getCart = (): CartItem[] => {
+  try {
+    const cart = localStorage.getItem(CART_KEY);
+    return cart ? JSON.parse(cart) : [];
+  } catch (error) {
+    console.error('Failed to parse cart from localStorage:', error);
+    return [];
+  }
+};
+
+// Save cart to localStorage
+const saveCart = (cart: CartItem[]) => {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  } catch (error) {
+    console.error('Failed to save cart to localStorage:', error);
+    message.error('Lỗi lưu giỏ hàng');
+  }
+};
+
+// Add to cart
+const addToCart = () => {
+  if (!data.value.id) {
+    message.warning('Không tìm thấy sản phẩm');
+    return;
+  }
+
+  const cart = getCart();
+  const existingItem = cart.find(item => item.id === data.value.id);
+
+  if (existingItem) {
+    // If product already in cart, increase quantity
+    existingItem.cartQuantity += quantity.value;
+    if (existingItem.cartQuantity > data.value.amount) {
+      existingItem.cartQuantity = data.value.amount;
+      message.warning(`Chỉ có thể thêm tối đa ${data.value.amount} sản phẩm`);
+    }
+  } else {
+    // Add new item to cart
+    const newItem: CartItem = {
+      ...data.value,
+      cartQuantity: quantity.value,
+      addedAt: Date.now()
+    };
+    cart.push(newItem);
+  }
+
+  saveCart(cart);
+  message.success(`Đã thêm ${quantity.value} sản phẩm vào giỏ hàng`);
+  quantity.value = 1; // Reset quantity
+};
+
+// Buy now (add to cart + redirect)
+const buyNow = () => {
+  addToCart();
+  // Redirect to cart after a short delay
+  setTimeout(() => {
+    window.location.href = '/cart';
+  }, 500);
+};
+
 onMounted(() => {
   getProductDetail();
 });
-
 </script>
 
 <style scoped>

@@ -1,20 +1,21 @@
 <template>
-    <div class="cart-view">
-        <div class="cart-left">
+    <div :class="['cart-view', cartItems.length > 0 ? 'cart-no-empty' : 'cart-empty']">
+        <div :class="[cartItems.length > 0 ? 'cart-left' : 'cart-left-empty']">
             <div class="p-3">
                 <div class="flex justify-between items-center">
-                    <h3 class="text-2xl font-bold">Giỏ hàng (3)</h3>
-                    <a-popconfirm title="Are you sure delete all?" ok-text="Yes" cancel-text="No" @confirm="confirm"
-                        @cancel="cancel">
-                        <button class="text-purple-600 cursor-pointer">Xóa</button>
+                    <h3 v-if="cartItems.length > 0" class="text-2xl font-bold">Giỏ hàng ({{ cartItems.length }})</h3>
+                    <a-popconfirm title="Bạn có chắc muốn xóa toàn bộ sản phẩm?" ok-text="Xóa" cancel-text="Hủy"
+                        @confirm="confirm" @cancel="cancel">
+                        <button class="text-purple-600 cursor-pointer" v-if="cartItems.length > 0">Xóa tất cả</button>
                     </a-popconfirm>
                 </div>
                 <div class="grid gap-2 md:gap-6">
-                    <div class="mt-4 p-4 free-shipping rounded">
+                    <div v-if="cartItems.length > 0" class="mt-4 p-4 free-shipping rounded">
                         <p>Miễn phí vận chuyển cho mọi đơn hàng từ 0đ</p>
                     </div>
                     <div class="grid gap-4">
-                        <div class="hidden grid-cols-[calc(16rem/16)_1fr_calc(24rem/16)] items-center gap-4 md:grid">
+                        <div v-if="cartItems.length > 0"
+                            class="hidden grid-cols-[calc(16rem/16)_1fr_calc(24rem/16)] items-center gap-4 md:grid">
                             <a-checkbox :checked="checkedAll" @change="toggleCheckAll"></a-checkbox>
                             <div class="flex items-center space-x-4 justify-between">
                                 <div class="grid flex-1 items-start gap-2">
@@ -27,70 +28,107 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="divider-line hidden w-full md:block"></div>
-                        <!-- item1 -->
+                        <div v-if="cartItems.length > 0" class="divider-line hidden w-full md:block"></div>
+
+                        <!-- Empty cart message -->
+                        <div v-if="cartItems.length === 0" class="text-center py-12">
+                            <Empty />
+                        </div>
+
+                        <!-- Cart items -->
                         <CartItem v-for="(item, idx) in cartItems" :key="item.id" :checked="item.checked"
-                            :name="item.name" :image="item.image" :link="item.link" :price="item.price"
-                            :quantity="item.quantity" :total="item.total" :srcset="item.srcset"
+                            :name="item.name" :image="item.imageUrl[0]" :link="`/products/${item.id}`"
+                            :price="formatPrice(item.price)" :quantity="item.cartQuantity" :total="calculateTotal(item)"
                             @toggle="toggleItem(idx)" @increase="increaseItem(idx)" @decrease="decreaseItem(idx)"
                             @delete="deleteItem(idx)" @cancel="cancel" />
                     </div>
                 </div>
             </div>
         </div>
-        <CartSummary :items="cartItems" @showDrawer="showDrawer" />
+        <CartSummary v-if="cartItems.length > 0" :items="cartItems" @showDrawer="showDrawer" />
     </div>
     <Drawer v-model:open="open" />
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { message } from 'ant-design-vue';
 import CartItem from '@/components/Cart/Item/CartItem.vue';
 import Drawer from '@/components/Cart/Drawer/index.vue';
 import CartSummary from '@/components/Cart/CartSummary.vue';
+import type { IGetProductResponse } from '@/api/models/product';
+import Empty from '@/components/common/empty/index.vue';
+
+const CART_KEY = 'pharmacy_cart';
+
+interface CartItem extends IGetProductResponse {
+    checked: boolean;
+    cartQuantity: number;
+    addedAt: number;
+}
 
 const open = ref<boolean>(false);
+const cartItems = ref<CartItem[]>([]);
+const checkedAll = ref(false);
+
+// Get cart from localStorage
+const getCartFromLocalStorage = (): CartItem[] => {
+    try {
+        const cart = localStorage.getItem(CART_KEY);
+        if (!cart) return [];
+
+        const parsed = JSON.parse(cart);
+        // Add checked property if missing
+        return parsed.map((item: CartItem) => ({
+            ...item,
+            checked: item.checked || false
+        }));
+    } catch (error) {
+        console.error('Failed to parse cart from localStorage:', error);
+        return [];
+    }
+};
+
+// Save cart to localStorage
+const saveCartToLocalStorage = (items: CartItem[]) => {
+    try {
+        localStorage.setItem(CART_KEY, JSON.stringify(items));
+    } catch (error) {
+        console.error('Failed to save cart to localStorage:', error);
+        message.error('Lỗi lưu giỏ hàng');
+    }
+};
+
+// Format price string (remove ₫ and non-digits, return number)
+const formatPrice = (price: string | number): number => {
+    if (typeof price === 'number') return price;
+    return Number(price.toString().replace(/[^\d]/g, ''));
+};
+
+// Calculate total for item
+const calculateTotal = (item: CartItem): number => {
+    const price = formatPrice(item.price);
+    return price * item.cartQuantity;
+};
+
+// Format number to Vietnamese currency
+const formatCurrency = (value: number): string => {
+    return value.toLocaleString('vi-VN') + ' ₫';
+};
+
 const showDrawer = () => {
     open.value = true;
 };
 
 const confirm = () => {
     cartItems.value = [];
+    saveCartToLocalStorage(cartItems.value);
     message.success('Đã xóa toàn bộ sản phẩm trong giỏ hàng');
 };
 
-const cancel = (e: MouseEvent) => {
-    message.error('Click on No');
+const cancel = () => {
+    message.info('Hủy thao tác');
 };
-
-// Bổ sung dữ liệu cho từng item
-const cartItems = ref([
-    {
-        id: 1,
-        checked: false,
-        name: 'Sữa bột dinh dưỡng PEDIASURE',
-        image: 'https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/promotion_sku_images/20250619040558-0-P20532.png',
-        link: '#',
-        price: '180.000 ₫',
-        quantity: 2,
-        total: '360.000 ₫',
-        srcset: ''
-    },
-    {
-        id: 2,
-        checked: false,
-        name: 'Vitamin C 500mg',
-        image: 'https://production-cdn.pharmacity.io/digital/640x640/plain/e-com/images/ecommerce/P20532_1.jpg',
-        link: '#',
-        price: '120.000 ₫',
-        quantity: 1,
-        total: '120.000 ₫',
-        srcset: ''
-    }
-]);
-
-const checkedAll = ref(false);
 
 function toggleCheckAll() {
     checkedAll.value = !checkedAll.value;
@@ -103,35 +141,44 @@ function toggleItem(idx: number) {
 }
 
 function increaseItem(idx: number) {
-    cartItems.value[idx].quantity++;
-    updateTotal(idx);
+    cartItems.value[idx].cartQuantity++;
+    saveCartToLocalStorage(cartItems.value);
 }
+
 function decreaseItem(idx: number) {
-    if (cartItems.value[idx].quantity > 1) {
-        cartItems.value[idx].quantity--;
-        updateTotal(idx);
+    if (cartItems.value[idx].cartQuantity > 1) {
+        cartItems.value[idx].cartQuantity--;
+        saveCartToLocalStorage(cartItems.value);
     }
 }
+
 function deleteItem(idx: number) {
+    const itemName = cartItems.value[idx].name;
     cartItems.value.splice(idx, 1);
+    saveCartToLocalStorage(cartItems.value);
+    message.success(`Đã xóa "${itemName}" khỏi giỏ hàng`);
 }
-function updateTotal(idx: number) {
-    // Giả sử price là dạng "180.000 ₫"
-    const price = Number(cartItems.value[idx].price.replace(/[^\d]/g, ''));
-    cartItems.value[idx].total = (price * cartItems.value[idx].quantity).toLocaleString('vi-VN') + ' ₫';
-}
+
+onMounted(() => {
+    // Load cart from localStorage on component mount
+    cartItems.value = getCartFromLocalStorage();
+    console.log('Loaded cart items:', cartItems.value);
+});
 </script>
 
 <style scoped>
 .cart-view {
     display: grid;
-    grid-template-columns: 1fr 320px;
     gap: 24px;
     padding: 24px;
     max-width: 1280px;
     margin: 0 auto;
     background: #fbf7ff;
     min-height: calc(100vh - 200px);
+}
+
+.cart-no-empty {
+    grid-template-columns: 1fr 320px;
 }
 
 /* Left panel */
@@ -141,6 +188,12 @@ function updateTotal(idx: number) {
     box-shadow: 0 4px 16px rgba(139, 92, 246, 0.06);
     overflow: hidden;
     border: 1px solid #f3e8ff;
+}
+
+.cart-left-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .cart-left>div {
@@ -161,18 +214,6 @@ function updateTotal(idx: number) {
     height: 1px;
     background: #efe6ff;
     margin: 8px 0 0 0;
-}
-
-/* Right summary panel */
-.cart-right {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.06);
-    border: 1px solid #f3e8ff;
-    height: fit-content;
-    position: sticky;
-    top: 100px;
-    padding: 20px;
 }
 
 /* Headings and small text */
@@ -197,7 +238,7 @@ function updateTotal(idx: number) {
     text-decoration: underline;
 }
 
-/* Checkbox styling for Antd (scoped deep selector) */
+/* Checkbox styling for Antd */
 .cart-left :deep(.ant-checkbox) {
     --ant-primary-color: #8b5cf6;
 }
@@ -211,14 +252,14 @@ function updateTotal(idx: number) {
     border-color: #8b5cf6;
 }
 
-/* Cart item separator */
-.cart-left :deep(.cart-item-separator) {
-    background: #f3e8ff;
-}
-
 /* Product totals text */
 .cart-left :deep(.text-neutral-900) {
     color: #2d0b45;
+}
+
+/* Empty cart styling */
+.pi-shopping-cart {
+    opacity: 0.5;
 }
 
 /* Responsive adjustments */
@@ -227,11 +268,6 @@ function updateTotal(idx: number) {
         grid-template-columns: 1fr;
         gap: 20px;
         padding: 16px;
-    }
-
-    .cart-right {
-        position: static;
-        top: auto;
     }
 }
 
@@ -243,10 +279,6 @@ function updateTotal(idx: number) {
 
     .cart-left>div {
         padding: 16px;
-    }
-
-    .cart-right {
-        padding: 16px !important;
     }
 }
 </style>

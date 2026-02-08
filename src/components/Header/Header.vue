@@ -3,45 +3,115 @@
     <div class="flex flex-col md:flex-row items-center justify-between py-4 px-2 w-full max-w-6xl mx-auto gap-4">
 
       <!-- Logo -->
-      <div class="flex items-center justify-center gap-2 cursor-pointer hover:opacity-80 transition">
+      <div class="flex items-center justify-center gap-2 cursor-pointer hover:opacity-80 transition"
+        @click="$router.push('/')">
         <img class="w-10 h-10" src="../../assets/pharmacy-app.png" alt="Logo">
         <span class="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Pharmacy</span>
       </div>
 
       <!-- Search -->
       <div class="w-full md:w-auto">
-        <a-input-search enter-button placeholder="Tìm kiếm thuốc..." class="search-input w-full md:w-[350px]" />
+        <a-input-search enter-button placeholder="Tìm kiếm thuốc..." class="search-input w-full md:w-[350px]"
+          style="width: 400px;" />
       </div>
 
       <!-- Icons -->
       <div class="flex items-center justify-center gap-6">
-        <div class="icon-hover group">
-          <BellOutlined class="text-xl md:text-2xl text-white group-hover:text-yellow-300 transition" />
-          <span
-            class="text-xs text-white opacity-0 group-hover:opacity-100 absolute top-12 bg-black bg-opacity-70 px-2 py-1 rounded whitespace-nowrap transition">Thông
-            báo</span>
-        </div>
-        <div class="icon-hover group relative">
-          <ShoppingCartOutlined class="text-xl md:text-2xl text-white group-hover:text-emerald-300 transition" />
-          <span
-            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">0</span>
-          <span
-            class="text-xs text-white opacity-0 group-hover:opacity-100 absolute top-12 bg-black bg-opacity-70 px-2 py-1 rounded whitespace-nowrap transition">Giỏ
-            hàng</span>
-        </div>
-        <div
-          class="flex items-center gap-2 px-3 py-1 rounded-lg bg-white bg-opacity-15 border-2 border-white border-opacity-40  hover:bg-opacity-25 hover:border-opacity-60 cursor-pointer transition group">
-          <UserOutlined class="text-lg md:text-xl group-hover:text-yellow-300 transition" />
-          <span class="text-sm md:text-base font-semibold group-hover:text-violet-400 transition">Đăng nhập</span>
-        </div>
+
+        <router-link to="/cart" class="flex items-center gap-2">
+          <div
+            class="icon-hover group relative flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-500 text-white bg-opacity-15 border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60 cursor-pointer transition group">
+            <a-badge :size="'small'" :count="cartCount" class="animate-pulse">
+              <i class="pi pi-shopping-cart text-lg" style="color: #fff;"></i>
+            </a-badge>
+            <span class="text-sm md:text-base font-semibold">Giỏ hàng</span>
+          </div>
+        </router-link>
+
+        <a-dropdown :placement="'bottom'" :arrow="{ pointAtCenter: true }">
+          <div @click="openAuthDialog"
+            class="flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-500 bg-opacity-15 text-white border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60 cursor-pointer transition group">
+            <i class="pi pi-user text-lg"></i>
+            <span class="text-sm md:text-base font-semibold">Đăng nhập</span>
+          </div>
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="1" @click="() => $router.push('/ca-nhan/thong-tin')">
+                <div>
+                  <i class="pi pi-user mr-2"></i>
+                  <span>Thông tin cá nhân</span>
+                </div>
+              </a-menu-item>
+              <a-menu-item key="2" @click="() => $router.push('/ca-nhan/don-hang')">
+                <div>
+                  <i class="pi pi-shopping-cart mr-2"></i>
+                  <span>Đơn hàng của tôi</span>
+                </div>
+              </a-menu-item>
+              <a-menu-item key="3">
+                <div>
+                  <i class="pi pi-sign-out mr-2"></i>
+                  <span>Đăng xuất</span>
+                </div>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
       </div>
 
     </div>
   </div>
+
+  <!-- Auth Dialog -->
+  <AuthDialog ref="authDialogRef" />
 </template>
 
 <script setup lang="ts">
-import { BellOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons-vue';
+import { ref, onMounted } from 'vue';
+import type { IGetProductResponse } from '@/api/models/product';
+import AuthDialog from '@/components/Auth/AuthDialog.vue';
+
+const CART_KEY = 'pharmacy_cart';
+
+interface CartItem extends IGetProductResponse {
+  cartQuantity: number;
+  addedAt: number;
+}
+
+const cartCount = ref(0);
+const authDialogRef = ref<InstanceType<typeof AuthDialog>>();
+
+// Get cart from localStorage
+const getCart = (): CartItem[] => {
+  try {
+    const cart = localStorage.getItem(CART_KEY);
+    return cart ? JSON.parse(cart) : [];
+  } catch (error) {
+    console.error('Failed to parse cart from localStorage:', error);
+    return [];
+  }
+};
+
+// Calculate total items in cart
+const updateCartCount = () => {
+  const cart = getCart();
+  cartCount.value = cart.reduce((sum, item) => sum + item.cartQuantity, 0);
+};
+
+// Listen for cart changes
+const watchCart = () => {
+  window.addEventListener('storage', updateCartCount);
+};
+
+// Open auth dialog
+const openAuthDialog = () => {
+  authDialogRef.value?.openModal();
+};
+
+onMounted(() => {
+  updateCartCount();
+  watchCart();
+});
 </script>
 
 <style scoped>
@@ -91,5 +161,21 @@ import { BellOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/ic
   position: relative;
   cursor: pointer;
   transition: all 0.3s ease;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 </style>

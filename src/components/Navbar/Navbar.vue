@@ -4,16 +4,12 @@
             <div class="max-w-6xl mx-auto flex items-center justify-between h-14">
                 <ul class="flex space-x-8 h-full">
                     <li v-for="category in props.categories" :key="category.id" class="flex items-center group">
-                        <router-link :to="`/products/by-category/${category.id}`"
+                        <router-link :to="`/${category.id}/products`"
                             class="text-gray-700 font-semibold hover:text-purple-600 transition-colors duration-200 py-4 border-b-2 border-transparent group-hover:border-purple-600">
                             {{ category.name }}
                         </router-link>
                     </li>
                 </ul>
-                <div class="flex items-center gap-4">
-                    <i
-                        class="pi pi-question-circle text-gray-600 hover:text-purple-600 cursor-pointer transition text-xl"></i>
-                </div>
             </div>
         </nav>
     </div>
