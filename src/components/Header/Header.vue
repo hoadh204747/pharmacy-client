@@ -32,9 +32,11 @@
           <div @click="openAuthDialog"
             class="flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-500 bg-opacity-15 text-white border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60 cursor-pointer transition group">
             <i class="pi pi-user text-lg"></i>
-            <span class="text-sm md:text-base font-semibold">Đăng nhập</span>
+            <span class="text-sm md:text-base font-semibold">
+              {{ userStore.isLogin ? userStore.username : "Đăng nhập" }}
+            </span>
           </div>
-          <template #overlay>
+          <template #overlay v-if="userStore.isLogin">
             <a-menu>
               <a-menu-item key="1" @click="() => $router.push('/ca-nhan/thong-tin')">
                 <div>
@@ -51,7 +53,7 @@
               <a-menu-item key="3">
                 <div>
                   <i class="pi pi-sign-out mr-2"></i>
-                  <span>Đăng xuất</span>
+                  <span @click="handleLogout">Đăng xuất</span>
                 </div>
               </a-menu-item>
             </a-menu>
@@ -70,6 +72,9 @@
 import { ref, onMounted } from 'vue';
 import type { IGetProductResponse } from '@/api/models/product';
 import AuthDialog from '@/components/Auth/AuthDialog.vue';
+import { useUserStore } from '@/stores/user';
+
+const userStore = useUserStore();
 
 const CART_KEY = 'pharmacy_cart';
 
@@ -80,6 +85,7 @@ interface CartItem extends IGetProductResponse {
 
 const cartCount = ref(0);
 const authDialogRef = ref<InstanceType<typeof AuthDialog>>();
+
 
 // Get cart from localStorage
 const getCart = (): CartItem[] => {
@@ -105,7 +111,13 @@ const watchCart = () => {
 
 // Open auth dialog
 const openAuthDialog = () => {
+  if (userStore.isLogin) return;
   authDialogRef.value?.openModal();
+};
+
+const handleLogout = () => {
+  userStore.logout();
+  localStorage.removeItem('token');
 };
 
 onMounted(() => {

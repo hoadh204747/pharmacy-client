@@ -1,5 +1,6 @@
 <template>
     <a-config-provider :theme="{ token: { colorPrimary: '#8b5cf6' } }">
+        <a-spin v-if="globalLoading" size="large" tip="Đang tải..." class="global-loading" />
         <div>
             <Advertisement />
             <Header />
@@ -26,6 +27,7 @@ import CarouselCategory from '@/components/CarouselCategory/index.vue';
 import type { IGetCategoryResponse } from '@/api/models/category';
 import { CategoryService } from '@/api/services/category';
 import { onMounted, ref } from 'vue';
+import { globalLoading } from '@/stores/loading'
 
 const categories = ref<IGetCategoryResponse[]>([]);
 
@@ -39,4 +41,14 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+.global-loading {
+    position: fixed !important;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+</style>

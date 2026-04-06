@@ -114,7 +114,10 @@
 import { ref } from 'vue';
 import { message } from 'ant-design-vue';
 import { useRouter } from 'vue-router';
+import { AuthService } from '@/api/services/auth';
+import { useUserStore } from '@/stores/user';
 
+const userStore = useUserStore();
 const router = useRouter();
 
 // Modal state
@@ -224,33 +227,18 @@ const handleLogin = async () => {
     isLoginSubmitting.value = true;
 
     try {
-        // TODO: Replace with actual API endpoint
-        // const response = await fetch('/api/auth/login', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(loginForm.value)
-        // });
+        const data = await AuthService.login({
+            phone: loginForm.value.phone,
+            password: loginForm.value.password
+        });
 
-        // if (!response.ok) {
-        //     throw new Error('Login failed');
-        // }
+        userStore.setUser(data.user);
 
-        // const data = await response.json();
-        // localStorage.setItem('token', data.token);
-        // localStorage.setItem('user', JSON.stringify(data.user));
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
+        localStorage.setItem('token', data.token);
         message.success('Đăng nhập thành công!');
-        console.log('Login with:', loginForm.value);
 
-        // Close modal
         closeModal();
 
-        // Reset form
         loginForm.value = { phone: '', password: '' };
     } catch (error) {
         console.error('Login error:', error);
