@@ -111,11 +111,6 @@ const calculateTotal = (item: CartItem): number => {
     return price * item.cartQuantity;
 };
 
-// Format number to Vietnamese currency
-const formatCurrency = (value: number): string => {
-    return value.toLocaleString('vi-VN') + ' ₫';
-};
-
 const showDrawer = () => {
     open.value = true;
 };
