@@ -11,8 +11,21 @@
 
       <!-- Search -->
       <div class="w-full md:w-auto">
-        <a-input-search enter-button placeholder="Tìm kiếm thuốc..." class="search-input w-full md:w-[350px]"
-          style="width: 400px;" />
+        <a-spin :spinning="searchLoading" tip="Đang tìm kiếm..." size="large">
+          <a-auto-complete v-model:value="searchValue" :options="autocompleteOptions" :allow-clear="true"
+            :loading="searchLoading" placeholder="Tìm kiếm thuốc..." class=" w-full md:w-[350px]" style="width: 400px;"
+            @select="handleSearchSelect" @search="handleSearch">
+            <template #option="{ imageUrl, label, price }">
+              <div class="flex items-center gap-3 py-2">
+                <img v-if="imageUrl" :src="imageUrl" :alt="label" class="w-12 h-12 object-cover rounded">
+                <div class="flex-1">
+                  <div class="font-semibold text-gray-800">{{ label }}</div>
+                  <div class="text-sm text-violet-600 font-bold">{{ price?.toLocaleString() }} đ</div>
+                </div>
+              </div>
+            </template>
+          </a-auto-complete>
+        </a-spin>
       </div>
 
       <!-- Icons -->
@@ -70,24 +83,28 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import type { IGetProductResponse } from '@/api/models/product';
+import { useRouter } from 'vue-router';
 import AuthDialog from '@/components/Auth/AuthDialog.vue';
 import { useUserStore } from '@/stores/user';
+import { ProductService } from '@/api/services/product';
+import { debounce } from 'lodash';
 
+const router = useRouter();
 const userStore = useUserStore();
 
 const CART_KEY = 'pharmacy_cart';
 
-interface CartItem extends IGetProductResponse {
+interface CartItem {
   cartQuantity: number;
   addedAt: number;
 }
 
 const cartCount = ref(0);
 const authDialogRef = ref<InstanceType<typeof AuthDialog>>();
+const searchValue = ref('');
+const autocompleteOptions = ref<any[]>([]);
+const searchLoading = ref(false);
 
-
-// Get cart from localStorage
 const getCart = (): CartItem[] => {
   try {
     const cart = localStorage.getItem(CART_KEY);
@@ -98,10 +115,43 @@ const getCart = (): CartItem[] => {
   }
 };
 
-// Calculate total items in cart
 const updateCartCount = () => {
   const cart = getCart();
   cartCount.value = cart.reduce((sum, item) => sum + item.cartQuantity, 0);
+};
+
+const handleSearch = debounce(async (value: string) => {
+  if (!value) {
+    autocompleteOptions.value = [];
+    searchLoading.value = false;
+    return;
+  }
+  searchLoading.value = true;
+  try {
+    const response = await ProductService.searchProducts(value);
+    if (response) {
+      autocompleteOptions.value = response.slice(0, 10).map(product => ({
+        label: product.name,
+        value: product.id,
+        imageUrl: product.imageUrl?.[0],
+        price: product.price,
+        product
+      }));
+    }
+  } catch (error) {
+    autocompleteOptions.value = [];
+  } finally {
+    searchLoading.value = false;
+  }
+}, 1000);
+
+const handleSearchSelect = (value: number) => {
+  const selected = autocompleteOptions.value.find(option => option.value === value);
+  if (selected) {
+    router.push(`/products/${selected.value}`);
+    searchValue.value = '';
+    autocompleteOptions.value = [];
+  }
 };
 
 // Listen for cart changes
@@ -109,7 +159,6 @@ const watchCart = () => {
   window.addEventListener('storage', updateCartCount);
 };
 
-// Open auth dialog
 const openAuthDialog = () => {
   if (userStore.isLogin) return;
   authDialogRef.value?.openModal();
@@ -145,6 +194,21 @@ onMounted(() => {
   background: rgba(255, 255, 255, 1);
   border-color: #8b5cf6;
   box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+}
+
+.search-input :deep(.ant-select-selector) {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+.search-input :deep(.ant-select-selector:hover),
+.search-input :deep(.ant-select-focused .ant-select-selector) {
+  background: rgba(255, 255, 255, 1) !important;
+  border-color: #8b5cf6 !important;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.3) !important;
 }
 
 .search-input :deep(.ant-input) {

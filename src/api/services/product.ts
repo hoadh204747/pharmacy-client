@@ -18,4 +18,10 @@ export class ProductService {
   public static readonly getProductById: (id: number) => Promise<IGetProductResponse> = async (
     id,
   ) => axiosInstance.get<IGetProductResponse>(`/products/${id}`).then((res) => res.data)
+
+  public static readonly searchProducts: (keyword: string) => Promise<IGetProductResponse[]> =
+    async (keyword) =>
+      axiosInstance
+        .get<IGetProductResponse[]>(`/products/search?keyword=${keyword}`)
+        .then((res) => res.data)
 }

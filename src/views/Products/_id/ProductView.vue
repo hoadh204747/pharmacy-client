@@ -77,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import Swiper from '@/components/Product/Swiper/Swiper.vue';
 import MainInfo from '@/components/Product/MainInfo/index.vue';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons-vue';
@@ -177,6 +177,12 @@ const buyNow = () => {
 };
 
 onMounted(() => {
+  getProductDetail();
+});
+
+// Watch for route params changes to reload data when product ID changes
+watch(() => route.params.id, () => {
+  quantity.value = 1; // Reset quantity when switching products
   getProductDetail();
 });
 </script>
