@@ -34,7 +34,7 @@
         <router-link to="/cart" class="flex items-center gap-2">
           <div
             class="icon-hover group relative flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-500 text-white bg-opacity-15 border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60 cursor-pointer transition group">
-            <a-badge :size="'small'" :count="cartCount" class="animate-pulse">
+            <a-badge :size="'small'" :count="cartStore.cartCount" class="animate-pulse">
               <i class="pi pi-shopping-cart text-lg" style="color: #fff;"></i>
             </a-badge>
             <span class="text-sm md:text-base font-semibold">Giỏ hàng</span>
@@ -86,39 +86,18 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import AuthDialog from '@/components/Auth/AuthDialog.vue';
 import { useUserStore } from '@/stores/user';
+import { useCartStore } from '@/stores/cart';
 import { ProductService } from '@/api/services/product';
 import { debounce } from 'lodash';
 
 const router = useRouter();
 const userStore = useUserStore();
+const cartStore = useCartStore();
 
-const CART_KEY = 'pharmacy_cart';
-
-interface CartItem {
-  cartQuantity: number;
-  addedAt: number;
-}
-
-const cartCount = ref(0);
 const authDialogRef = ref<InstanceType<typeof AuthDialog>>();
 const searchValue = ref('');
 const autocompleteOptions = ref<any[]>([]);
 const searchLoading = ref(false);
-
-const getCart = (): CartItem[] => {
-  try {
-    const cart = localStorage.getItem(CART_KEY);
-    return cart ? JSON.parse(cart) : [];
-  } catch (error) {
-    console.error('Failed to parse cart from localStorage:', error);
-    return [];
-  }
-};
-
-const updateCartCount = () => {
-  const cart = getCart();
-  cartCount.value = cart.reduce((sum, item) => sum + item.cartQuantity, 0);
-};
 
 const handleSearch = debounce(async (value: string) => {
   if (!value) {
@@ -154,11 +133,6 @@ const handleSearchSelect = (value: number) => {
   }
 };
 
-// Listen for cart changes
-const watchCart = () => {
-  window.addEventListener('storage', updateCartCount);
-};
-
 const openAuthDialog = () => {
   if (userStore.isLogin) return;
   authDialogRef.value?.openModal();
@@ -170,9 +144,10 @@ const handleLogout = () => {
 };
 
 onMounted(() => {
-  updateCartCount();
-  watchCart();
+  cartStore.loadCart();
+  cartStore.initStorageListener();
 });
+
 </script>
 
 <style scoped>

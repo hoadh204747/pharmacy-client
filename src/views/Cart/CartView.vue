@@ -56,59 +56,39 @@ import { message } from 'ant-design-vue';
 import CartItem from '@/components/Cart/Item/CartItem.vue';
 import Drawer from '@/components/Cart/Drawer/index.vue';
 import CartSummary from '@/components/Cart/CartSummary.vue';
+import { useCartStore } from '@/stores/cart';
 import type { IGetProductResponse } from '@/api/models/product';
 import Empty from '@/components/common/empty/index.vue';
 
-const CART_KEY = 'pharmacy_cart';
-
-interface CartItem extends IGetProductResponse {
+interface CartViewItem extends IGetProductResponse {
     checked: boolean;
     cartQuantity: number;
     addedAt: number;
 }
 
+const cartStore = useCartStore();
 const open = ref<boolean>(false);
-const cartItems = ref<CartItem[]>([]);
-const checkedAll = ref(false);
 
-// Get cart from localStorage
-const getCartFromLocalStorage = (): CartItem[] => {
-    try {
-        const cart = localStorage.getItem(CART_KEY);
-        if (!cart) return [];
+const cartItems = computed(() => cartStore.cart as CartViewItem[]);
 
-        const parsed = JSON.parse(cart);
-        // Add checked property if missing
-        return parsed.map((item: CartItem) => ({
-            ...item,
-            checked: item.checked || false
-        }));
-    } catch (error) {
-        console.error('Failed to parse cart from localStorage:', error);
-        return [];
-    }
-};
-
-// Save cart to localStorage
-const saveCartToLocalStorage = (items: CartItem[]) => {
-    try {
-        localStorage.setItem(CART_KEY, JSON.stringify(items));
-    } catch (error) {
-        console.error('Failed to save cart to localStorage:', error);
-        message.error('Lỗi lưu giỏ hàng');
-    }
-};
+const checkedAll = computed({
+    get: () => cartItems.value.length > 0 && cartItems.value.every(item => item.checked),
+    set: (value) => cartStore.toggleCheckAll(value)
+});
 
 // Format price string (remove ₫ and non-digits, return number)
-const formatPrice = (price: string | number): number => {
+const formatPrice = (price: string | number | undefined | null): number => {
     if (typeof price === 'number') return price;
-    return Number(price.toString().replace(/[^\d]/g, ''));
+    if (typeof price === 'string') {
+        return Number(price.replace(/[^\d]/g, '')) || 0;
+    }
+    return 0;
 };
 
 // Calculate total for item
-const calculateTotal = (item: CartItem): number => {
+const calculateTotal = (item: CartViewItem): number => {
     const price = formatPrice(item.price);
-    return price * item.cartQuantity;
+    return price * (item.cartQuantity ?? 0);
 };
 
 const showDrawer = () => {
@@ -116,8 +96,7 @@ const showDrawer = () => {
 };
 
 const confirm = () => {
-    cartItems.value = [];
-    saveCartToLocalStorage(cartItems.value);
+    cartStore.clearCart();
     message.success('Đã xóa toàn bộ sản phẩm trong giỏ hàng');
 };
 
@@ -127,36 +106,31 @@ const cancel = () => {
 
 function toggleCheckAll() {
     checkedAll.value = !checkedAll.value;
-    cartItems.value.forEach(item => item.checked = checkedAll.value);
 }
 
 function toggleItem(idx: number) {
-    cartItems.value[idx].checked = !cartItems.value[idx].checked;
-    checkedAll.value = cartItems.value.every(item => item.checked);
+    cartStore.toggleItemCheck(idx);
 }
 
 function increaseItem(idx: number) {
-    cartItems.value[idx].cartQuantity++;
-    saveCartToLocalStorage(cartItems.value);
+    cartStore.updateItem(idx, cartItems.value[idx].cartQuantity + 1);
 }
 
 function decreaseItem(idx: number) {
     if (cartItems.value[idx].cartQuantity > 1) {
-        cartItems.value[idx].cartQuantity--;
-        saveCartToLocalStorage(cartItems.value);
+        cartStore.updateItem(idx, cartItems.value[idx].cartQuantity - 1);
     }
 }
 
 function deleteItem(idx: number) {
     const itemName = cartItems.value[idx].name;
-    cartItems.value.splice(idx, 1);
-    saveCartToLocalStorage(cartItems.value);
+    cartStore.removeFromCart(idx);
     message.success(`Đã xóa "${itemName}" khỏi giỏ hàng`);
 }
 
 onMounted(() => {
-    // Load cart from localStorage on component mount
-    cartItems.value = getCartFromLocalStorage();
+    // Load cart from store on component mount
+    cartStore.loadCart();
     console.log('Loaded cart items:', cartItems.value);
 });
 </script>

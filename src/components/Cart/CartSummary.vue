@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <a-button type="primary" class="w-full md:w-auto"
-                    @click="isCartPage ? router.push('/check-out') : handleSubmitOrder()" :loading="isSubmitting">
+                    @click="isCartPage ? router.push('/check-out') : $emit('submitOrder')" :loading="isSubmitting">
                     <i v-if="!isSubmitting" class="pi pi-shopping-cart mr-2"></i>
                     {{ isSubmitting ? 'Đang xử lý...' : `Mua hàng (${totalQuantity})` }}
                 </a-button>
@@ -48,33 +48,29 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { message } from 'ant-design-vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import type { IGetProductResponse } from '@/api/models/product';
 import { formatPrice } from '@/utils/format';
-import { useCheckoutStore } from '@/stores/checkoutStore';
 
-interface CartItem extends IGetProductResponse {
+interface CartSummaryItem extends Partial<IGetProductResponse> {
     cartQuantity: number;
     addedAt: number;
     checked?: boolean;
 }
 
 const props = defineProps<{
-    items: CartItem[]
+    items: CartSummaryItem[],
+    isSubmitting?: boolean
 }>();
+defineEmits(['showDrawer', 'submitOrder']);
 
-defineEmits(['showDrawer']);
-
-const checkoutStore = useCheckoutStore();
 const router = useRouter();
 const isCartPage = router.currentRoute.value.name === 'cart';
 console.log('isCartPage:', isCartPage, router.currentRoute.value.name);
-const isSubmitting = ref(false);
 
 // Parse price từ string hoặc number
-const parsePrice = (price: string | number): number => {
+const parsePrice = (price: string | number | undefined): number => {
     if (typeof price === 'number') return price;
     if (!price) return 0;
     // Remove all non-digit characters and convert to number
@@ -100,112 +96,6 @@ const totalQuantity = computed(() => {
     return props.items.reduce((sum, item) => sum + (item.cartQuantity || 1), 0);
 });
 
-// Validate all checkout data before submit
-const validateCheckout = (): boolean => {
-    // Validate customer info
-    if (!checkoutStore.customerInfo.fullName?.trim()) {
-        message.error('Vui lòng nhập họ và tên');
-        return false;
-    }
-
-    if (!checkoutStore.customerInfo.phone?.trim()) {
-        message.error('Vui lòng nhập số điện thoại');
-        return false;
-    }
-
-    if (!checkoutStore.customerInfo.email?.trim()) {
-        message.error('Vui lòng nhập email');
-        return false;
-    }
-
-    // Validate address info
-    if (!checkoutStore.addressInfo.province) {
-        message.error('Vui lòng chọn tỉnh / thành phố');
-        return false;
-    }
-
-    if (!checkoutStore.addressInfo.district) {
-        message.error('Vui lòng chọn quận / huyện');
-        return false;
-    }
-
-    if (!checkoutStore.addressInfo.ward) {
-        message.error('Vui lòng chọn phường / xã');
-        return false;
-    }
-
-    if (!checkoutStore.addressInfo.address?.trim()) {
-        message.error('Vui lòng nhập địa chỉ cụ thể');
-        return false;
-    }
-
-    return true;
-};
-
-// Submit order
-const handleSubmitOrder = async () => {
-    // Validate all data
-    if (!validateCheckout()) {
-        return;
-    }
-
-    if (props.items.length === 0) {
-        message.error('Giỏ hàng của bạn đang trống');
-        return;
-    }
-
-    isSubmitting.value = true;
-
-    try {
-        // Prepare order data
-        const orderData = {
-            customerInfo: checkoutStore.customerInfo,
-            addressInfo: checkoutStore.addressInfo,
-            paymentMethod: checkoutStore.paymentMethod,
-            items: props.items.map(item => ({
-                productId: item.id,
-                quantity: item.cartQuantity || 1,
-                price: parsePrice(item.price)
-            })),
-            totalAmount: subTotal.value
-        };
-
-        console.log('Submitting order:', orderData);
-
-        // TODO: Replace with actual API endpoint
-        // const response = await fetch('/api/orders', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(orderData)
-        // });
-
-        // if (!response.ok) {
-        //     throw new Error('Failed to create order');
-        // }
-
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        message.success('Đơn hàng đã được tạo thành công!');
-
-        // Clear checkout data
-        checkoutStore.resetCheckout();
-
-        // Clear cart localStorage
-        localStorage.removeItem('pharmacy_cart');
-
-        // Redirect to order confirmation page
-        // router.push({ name: 'order-confirmation', params: { orderId: response.data.orderId } });
-        router.push('/');
-    } catch (error) {
-        console.error('Order submission error:', error);
-        message.error('Lỗi khi tạo đơn hàng. Vui lòng thử lại.');
-    } finally {
-        isSubmitting.value = false;
-    }
-};
 </script>
 
 <style scoped>

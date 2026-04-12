@@ -61,6 +61,10 @@
 <script setup lang="ts">
 import { message } from 'ant-design-vue';
 import router from '@/router';
+import { useCartStore } from '@/stores/cart';
+import type { CartItem } from '@/utils/index.type';
+
+const cartStore = useCartStore();
 
 const props = defineProps<{
     data: {
@@ -71,7 +75,8 @@ const props = defineProps<{
         imageUrl: string[]
         price: number
         discount: number
-        amount: number
+        amount: number,
+        brand: any,
         sold: number
         sale: boolean
         createdAt: string
@@ -79,22 +84,29 @@ const props = defineProps<{
     };
 }>();
 
-const emit = defineEmits(['add-to-cart']);
-
 function formatPrice(price: number): string {
     return new Intl.NumberFormat('vi-VN').format(price);
 }
 
-function addToCart() {
-    emit('add-to-cart', {
-        id: props.data.id,
-        name: props.data.name,
-        price: props.data.price,
-        discount: props.data.discount,
-        image: props.data.imageUrl[0]
-    });
+const addToCart = () => {
+    const existingItemIndex = cartStore.cart.findIndex((item) => item.id === props.data.id);
+
+    if (existingItemIndex !== -1) {
+        // If product already in cart, increase quantity
+        cartStore.updateItem(existingItemIndex, cartStore.cart[existingItemIndex].cartQuantity + 1);
+    } else {
+        // If product not in cart, add new item
+        const newItem: CartItem = {
+            ...props.data,
+            cartQuantity: 1,
+            addedAt: Date.now(),
+        };
+        cartStore.addToCart(newItem);
+    }
+
     message.success('Đã thêm vào giỏ hàng');
-}
+};
+
 </script>
 
 <style scoped></style>
