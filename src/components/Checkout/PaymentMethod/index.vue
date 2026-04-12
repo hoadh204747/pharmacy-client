@@ -4,12 +4,12 @@
 
         <div class="payment-options">
             <!-- COD - Thanh toán khi nhận hàng -->
-            <div class="payment-option" :class="{ active: checkoutStore.paymentMethod === 'cod' }"
-                @click="checkoutStore.setPaymentMethod('cod')">
+            <div class="payment-option" :class="{ active: checkoutStore.paymentMethod === EPaymentMethod.CASH }"
+                @click="checkoutStore.setPaymentMethod(EPaymentMethod.CASH)">
                 <div class="option-header">
                     <div class="radio-wrapper">
-                        <input type="radio" id="payment-cod" value="cod"
-                            :checked="checkoutStore.paymentMethod === 'cod'" class="radio-input" />
+                        <input type="radio" id="payment-cod" :value="EPaymentMethod.CASH"
+                            :checked="checkoutStore.paymentMethod === EPaymentMethod.CASH" class="radio-input" />
                         <label for="payment-cod" class="radio-label"></label>
                     </div>
                     <div class="option-info">
@@ -20,7 +20,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="checkoutStore.paymentMethod === 'cod'" class="option-content">
+                <div v-if="checkoutStore.paymentMethod === EPaymentMethod.CASH" class="option-content">
                     <p class="text-sm text-gray-600">
                         ✓ Thanh toán trực tiếp cho shipper khi nhận hàng
                     </p>
@@ -34,12 +34,12 @@
             </div>
 
             <!-- Bank Transfer - Thanh toán qua ngân hàng -->
-            <div class="payment-option" :class="{ active: checkoutStore.paymentMethod === 'bank' }"
-                @click="checkoutStore.setPaymentMethod('bank')">
+            <div class="payment-option" :class="{ active: checkoutStore.paymentMethod === EPaymentMethod.CARD }"
+                @click="checkoutStore.setPaymentMethod(EPaymentMethod.CARD)">
                 <div class="option-header">
                     <div class="radio-wrapper">
-                        <input type="radio" id="payment-bank" value="bank"
-                            :checked="checkoutStore.paymentMethod === 'bank'" class="radio-input" />
+                        <input type="radio" id="payment-bank" :value="EPaymentMethod.CARD"
+                            :checked="checkoutStore.paymentMethod === EPaymentMethod.CARD" class="radio-input" />
                         <label for="payment-bank" class="radio-label"></label>
                     </div>
                     <div class="option-info">
@@ -50,7 +50,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-if="checkoutStore.paymentMethod === 'bank'" class="option-content">
+                <div v-if="checkoutStore.paymentMethod === EPaymentMethod.CARD" class="option-content">
                     <p class="text-sm text-gray-600">
                         ✓ Hỗ trợ tất cả ngân hàng tại Việt Nam
                     </p>
@@ -73,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import { EPaymentMethod } from '@/api/models/order';
 import { useCheckoutStore } from '@/stores/checkoutStore';
 
 const checkoutStore = useCheckoutStore();

@@ -1,3 +1,4 @@
+import { EPaymentMethod } from '@/api/models/order'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -20,7 +21,7 @@ export type PaymentMethod = 'cod' | 'bank'
 export interface CheckoutData {
   customerInfo: CustomerInfo
   addressInfo: AddressInfo
-  paymentMethod: PaymentMethod
+  paymentMethod: EPaymentMethod
 }
 
 export const useCheckoutStore = defineStore('checkout', () => {
@@ -38,7 +39,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     address: '',
   })
 
-  const paymentMethod = ref<PaymentMethod>('cod')
+  const paymentMethod = ref<EPaymentMethod>(EPaymentMethod.CASH)
 
   // Update customer info
   const setCustomerInfo = (info: Partial<CustomerInfo>) => {
@@ -51,7 +52,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   // Update payment method
-  const setPaymentMethod = (method: PaymentMethod) => {
+  const setPaymentMethod = (method: EPaymentMethod) => {
     paymentMethod.value = method
   }
 
@@ -78,7 +79,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
       ward: '',
       address: '',
     }
-    paymentMethod.value = 'cod'
+    paymentMethod.value = EPaymentMethod.CASH
   }
 
   // Validate all required fields

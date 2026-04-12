@@ -4,7 +4,7 @@
             <div v-if="cartItems.length > 0" class="list-product">
                 <div class="flex justify-between items-center mb-4">
                     <h3 v-if="cartItems.length > 0" class="text-xl font-bold">Sản phẩm trong đơn ({{ cartItems.length
-                        }})</h3>
+                    }})</h3>
                 </div>
                 <div class="space-y-0">
                     <!-- Cart items -->
@@ -24,13 +24,14 @@
                 <PaymentMethod />
             </div>
         </div>
-        <CartSummary v-if="cartItems.length > 0" :items="cartItems" @showDrawer="showDrawer" />
+        <CartSummary v-if="cartItems.length > 0" :isSubmitting="isSubmitting" :items="cartItems"
+            @showDrawer="showDrawer" @submitOrder="handleSubmitOrder" />
     </div>
     <Drawer v-model:open="open" />
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { message } from 'ant-design-vue';
 import CheckoutItem from '@/components/Checkout/ProductCheckout/index.vue';
 import Drawer from '@/components/Cart/Drawer/index.vue';
@@ -41,8 +42,10 @@ import PaymentMethod from '@/components/Checkout/PaymentMethod/index.vue';
 import type { IGetProductResponse } from '@/api/models/product';
 import { formatPrice } from '@/utils/format';
 import Empty from '@/components/common/empty/index.vue';
-
-const CART_KEY = 'pharmacy_cart';
+import { useCheckoutStore } from '@/stores/checkoutStore';
+import { useCartStore } from '@/stores/cart';
+import { OrderService } from '@/api/services/order';
+import { useRouter } from 'vue-router';
 
 interface CartItem extends IGetProductResponse {
     checked?: boolean;
@@ -51,26 +54,13 @@ interface CartItem extends IGetProductResponse {
 }
 
 const open = ref<boolean>(false);
-const cartItems = ref<CartItem[]>([]);
+const isSubmitting = ref(false);
 
-// Get cart from localStorage
-const getCartFromLocalStorage = (): CartItem[] => {
-    try {
-        const cart = localStorage.getItem(CART_KEY);
-        if (!cart) return [];
+const checkoutStore = useCheckoutStore();
+const cartStore = useCartStore();
+const router = useRouter();
 
-        const parsed = JSON.parse(cart);
-        return parsed.map((item: CartItem) => ({
-            ...item,
-            checked: item.checked || false,
-            cartQuantity: item.cartQuantity || 1
-        }));
-    } catch (error) {
-        console.error('Failed to parse cart from localStorage:', error);
-        message.error('Lỗi tải giỏ hàng');
-        return [];
-    }
-};
+const cartItems = computed(() => cartStore.cart as CartItem[]);
 
 // Calculate total for item
 const calculateItemTotal = (item: CartItem): number => {
@@ -84,14 +74,98 @@ const showDrawer = () => {
 };
 
 onMounted(() => {
-    // Load cart from localStorage on component mount
-    cartItems.value = getCartFromLocalStorage();
+    // Load cart from store on component mount
+    cartStore.loadCart();
     console.log('Loaded cart items for checkout:', cartItems.value);
 
     if (cartItems.value.length === 0) {
         message.warning('Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.');
     }
 });
+
+// Validate all checkout data before submit
+const validateCheckout = (): boolean => {
+    if (!checkoutStore.customerInfo.fullName?.trim()) {
+        message.error('Vui lòng nhập họ và tên');
+        return false;
+    }
+
+    if (!checkoutStore.customerInfo.phone?.trim()) {
+        message.error('Vui lòng nhập số điện thoại');
+        return false;
+    }
+
+    if (!checkoutStore.customerInfo.email?.trim()) {
+        message.error('Vui lòng nhập email');
+        return false;
+    }
+
+    if (!checkoutStore.addressInfo.province) {
+        message.error('Vui lòng chọn tỉnh / thành phố');
+        return false;
+    }
+
+    if (!checkoutStore.addressInfo.district) {
+        message.error('Vui lòng chọn quận / huyện');
+        return false;
+    }
+
+    if (!checkoutStore.addressInfo.ward) {
+        message.error('Vui lòng chọn phường / xã');
+        return false;
+    }
+
+    if (!checkoutStore.addressInfo.address?.trim()) {
+        message.error('Vui lòng nhập địa chỉ cụ thể');
+        return false;
+    }
+
+    return true;
+};
+
+const handleSubmitOrder = async () => {
+    if (!validateCheckout()) {
+        return;
+    }
+
+    if (cartItems.value.length === 0) {
+        message.error('Giỏ hàng của bạn đang trống');
+        return;
+    }
+    isSubmitting.value = true;
+    try {
+        const orderData = {
+            paymentMethod: checkoutStore.paymentMethod,
+            shippingAddress: {
+                province: checkoutStore.addressInfo.province,
+                district: checkoutStore.addressInfo.district,
+                ward: checkoutStore.addressInfo.ward,
+                address: checkoutStore.addressInfo.address,
+                fullname: checkoutStore.customerInfo.fullName,
+                phone: checkoutStore.customerInfo.phone,
+                email: ''
+            },
+            orderItems: cartItems.value.map(item => ({
+                productId: item.id,
+                amount: item.cartQuantity
+            }))
+        };
+        const result = await OrderService.createOrder(orderData);
+        if (result.id) {
+            message.success('Đơn hàng của bạn đã được tạo thành công!');
+            checkoutStore.resetCheckout();
+            cartStore.clearCart();
+            router.push('/');
+        } else {
+            message.error('Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.');
+        }
+    } catch (error) {
+        message.error('Lỗi khi gửi đơn hàng');
+    } finally {
+        isSubmitting.value = false;
+
+    }
+};
 </script>
 
 <style scoped>

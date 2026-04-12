@@ -84,18 +84,16 @@ import { MinusOutlined, PlusOutlined } from '@ant-design/icons-vue';
 import { ProductService } from '@/api/services/product';
 import { useRoute } from 'vue-router';
 import { message } from 'ant-design-vue';
+import { useCartStore } from '@/stores/cart';
 import type { IGetProductResponse } from '@/api/models/product';
+import type { CartItem } from '@/utils/index.type';
 
 const route = useRoute();
+const cartStore = useCartStore();
 const data = ref<IGetProductResponse>({} as IGetProductResponse);
 const quantity = ref(1);
 
-const CART_KEY = 'pharmacy_cart';
 
-interface CartItem extends IGetProductResponse {
-  cartQuantity: number;
-  addedAt: number;
-}
 
 const getProductDetail = async () => {
   const res = await ProductService.getProductById(Number(route.params.id));
@@ -114,43 +112,22 @@ const increaseQuantity = () => {
   }
 };
 
-// Get cart from localStorage
-const getCart = (): CartItem[] => {
-  try {
-    const cart = localStorage.getItem(CART_KEY);
-    return cart ? JSON.parse(cart) : [];
-  } catch (error) {
-    console.error('Failed to parse cart from localStorage:', error);
-    return [];
-  }
-};
-
-// Save cart to localStorage
-const saveCart = (cart: CartItem[]) => {
-  try {
-    localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  } catch (error) {
-    console.error('Failed to save cart to localStorage:', error);
-    message.error('Lỗi lưu giỏ hàng');
-  }
-};
-
-// Add to cart
 const addToCart = () => {
   if (!data.value.id) {
     message.warning('Không tìm thấy sản phẩm');
     return;
   }
 
-  const cart = getCart();
-  const existingItem = cart.find(item => item.id === data.value.id);
+  const existingItemIndex = cartStore.cart.findIndex(item => item.id === data.value.id);
 
-  if (existingItem) {
+  if (existingItemIndex !== -1) {
     // If product already in cart, increase quantity
-    existingItem.cartQuantity += quantity.value;
-    if (existingItem.cartQuantity > data.value.amount) {
-      existingItem.cartQuantity = data.value.amount;
+    const newQuantity = cartStore.cart[existingItemIndex].cartQuantity + quantity.value;
+    if (newQuantity > data.value.amount) {
+      cartStore.updateItem(existingItemIndex, data.value.amount);
       message.warning(`Chỉ có thể thêm tối đa ${data.value.amount} sản phẩm`);
+    } else {
+      cartStore.updateItem(existingItemIndex, newQuantity);
     }
   } else {
     // Add new item to cart
@@ -159,10 +136,9 @@ const addToCart = () => {
       cartQuantity: quantity.value,
       addedAt: Date.now()
     };
-    cart.push(newItem);
+    cartStore.addToCart(newItem);
   }
 
-  saveCart(cart);
   message.success(`Đã thêm ${quantity.value} sản phẩm vào giỏ hàng`);
   quantity.value = 1; // Reset quantity
 };
@@ -177,6 +153,7 @@ const buyNow = () => {
 };
 
 onMounted(() => {
+  cartStore.loadCart();
   getProductDetail();
 });
 
