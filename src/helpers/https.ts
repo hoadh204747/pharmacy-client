@@ -12,6 +12,23 @@ const axiosInstance = axios.create({
   timeout: 5000,
 })
 
+let isRefreshing = false
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void
+  reject: (reason?: any) => void
+}> = []
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve(token)
+    }
+  })
+  failedQueue = []
+}
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -33,12 +50,52 @@ axiosInstance.interceptors.response.use(
     }
     return Promise.resolve(response)
   },
-  (error) => {
-    switch (error.response?.status) {
-      case 401:
-        message.error('Unauthorized! Please log in again.')
+  async (error) => {
+    const originalRequest = error.config
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject })
+        })
+          .then((token) => {
+            originalRequest.headers['Authorization'] = 'Bearer ' + token
+            return axiosInstance(originalRequest)
+          })
+          .catch((err) => {
+            return Promise.reject(err)
+          })
+      }
+      originalRequest._retry = true
+      isRefreshing = true
+      const refreshToken = localStorage.getItem('refreshToken')
+      if (!refreshToken) {
         router.push({ name: 'Login' })
-        break
+        return Promise.reject(error)
+      }
+
+      try {
+        const response = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken })
+        const newAccessToken = response.data.accessToken
+        const newRefreshToken = response.data.refreshToken
+
+        localStorage.setItem('token', newAccessToken)
+        localStorage.setItem('refreshToken', newRefreshToken)
+
+        axiosInstance.defaults.headers['Authorization'] = 'Bearer ' + newAccessToken
+        processQueue(null, newAccessToken)
+        return axiosInstance(originalRequest)
+      } catch (err) {
+        processQueue(err, null)
+        localStorage.removeItem('token')
+        localStorage.removeItem('refreshToken')
+        message.error('Session expired. Please log in again.')
+        router.push({ name: 'Login' })
+        return Promise.reject(err)
+      } finally {
+        isRefreshing = false
+      }
+    }
+    switch (error.response?.status) {
       case 403:
         message.error('Forbidden! You do not have permission to access this resource.')
         break

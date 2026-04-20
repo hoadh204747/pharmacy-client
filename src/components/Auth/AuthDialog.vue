@@ -35,7 +35,7 @@
                     <a-input v-model:value="loginForm.phone" placeholder="Nhập số điện thoại" size="large" allow-clear
                         :status="loginErrors.phone ? 'error' : ''" />
                     <span v-if="loginErrors.phone" class="text-xs text-red-500 mt-1 block">{{ loginErrors.phone
-                        }}</span>
+                    }}</span>
                 </div>
 
                 <div class="mb-6">
@@ -45,7 +45,7 @@
                     <a-input-password v-model:value="loginForm.password" placeholder="Nhập mật khẩu" size="large"
                         :status="loginErrors.password ? 'error' : ''" />
                     <span v-if="loginErrors.password" class="text-xs text-red-500 mt-1 block">{{ loginErrors.password
-                        }}</span>
+                    }}</span>
                 </div>
 
                 <a-button type="primary" block size="large" html-type="submit" :loading="isLoginSubmitting"
@@ -69,7 +69,7 @@
                     <a-input v-model:value="registerForm.email" type="email" placeholder="Nhập email" size="large"
                         allow-clear :status="registerErrors.email ? 'error' : ''" />
                     <span v-if="registerErrors.email" class="text-xs text-red-500 mt-1 block">{{ registerErrors.email
-                        }}</span>
+                    }}</span>
                 </div>
 
                 <div class="mb-4">
@@ -79,7 +79,7 @@
                     <a-input v-model:value="registerForm.phone" placeholder="Nhập số điện thoại" size="large"
                         allow-clear :status="registerErrors.phone ? 'error' : ''" />
                     <span v-if="registerErrors.phone" class="text-xs text-red-500 mt-1 block">{{ registerErrors.phone
-                        }}</span>
+                    }}</span>
                 </div>
 
                 <div class="mb-6">
@@ -234,7 +234,8 @@ const handleLogin = async () => {
 
         userStore.setUser(data.user);
 
-        localStorage.setItem('token', data.token);
+        localStorage.setItem('token', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
         message.success('Đăng nhập thành công!');
 
         closeModal();
