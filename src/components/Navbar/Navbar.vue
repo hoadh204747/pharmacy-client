@@ -4,8 +4,9 @@
             <div class="max-w-6xl mx-auto flex items-center justify-between h-14">
                 <ul class="flex space-x-8 h-full">
                     <li v-for="category in props.categories" :key="category.id" class="flex items-center group">
-                        <router-link :to="`/${category.id}/products`"
-                            class="text-gray-700 font-semibold hover:text-purple-600 transition-colors duration-200 py-4 border-b-2 border-transparent group-hover:border-purple-600">
+                        <router-link :to="`/${category.id}/products`" class="nav-link" :class="{
+                            'nav-link-active': isActive(`/${category.id}/products`)
+                        }">
                             {{ category.name }}
                         </router-link>
                     </li>
@@ -16,11 +17,18 @@
 </template>
 
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
 import type { IGetCategoryResponse } from '@/api/models/category'
+
+const route = useRoute()
 
 const props = defineProps<{
     categories?: Array<IGetCategoryResponse>
 }>()
+
+const isActive = (path: string): boolean => {
+    return route.path === path
+}
 </script>
 
 <style scoped>
@@ -29,6 +37,30 @@ const props = defineProps<{
     background: linear-gradient(to right, #f8f9fa 0%, #f3f4f6 100%);
     border-bottom: 1px solid #e5e7eb;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.nav-link {
+    color: #374151;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    padding: 1rem 0.5rem;
+    border-bottom: 3px solid transparent;
+    display: block;
+    position: relative;
+    background-color: transparent;
+    border-radius: 4px;
+}
+
+.nav-link:hover {
+    color: #a855f7;
+    border-bottom-color: #a855f7;
+    background-color: rgba(168, 85, 247, 0.1);
+}
+
+.nav-link-active {
+    color: #a855f7;
+    border-bottom-color: #a855f7;
+    background-color: rgba(168, 85, 247, 0.15);
 }
 
 @media (max-width: 768px) {

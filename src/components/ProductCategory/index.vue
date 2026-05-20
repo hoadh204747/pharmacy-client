@@ -80,7 +80,7 @@ const responsiveOptions = [
 
 /* Section background subtle */
 .product-category-section {
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+    /* background: linear-gradient(180deg, rgba(139, 92, 246, 0.03) 0%, rgba(255, 255, 255, 0) 100%); */
     padding-top: 1.25rem;
     padding-bottom: 1.25rem;
 }

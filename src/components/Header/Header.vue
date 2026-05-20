@@ -1,12 +1,12 @@
 <template>
   <div class="header-gradient">
-    <div class="flex flex-col md:flex-row items-center justify-between py-4 px-2 w-full max-w-6xl mx-auto gap-4">
+    <div class="flex flex-col md:flex-row items-center justify-between py-2 px-2 w-full max-w-6xl mx-auto gap-4">
 
       <!-- Logo -->
       <div class="flex items-center justify-center gap-2 cursor-pointer hover:opacity-80 transition"
         @click="$router.push('/')">
         <img class="w-10 h-10" src="../../assets/pharmacy-app.png" alt="Logo">
-        <span class="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">Pharmacy</span>
+        <span class="text-2xl md:text-3xl font-bold text-violet-500 drop-shadow-lg">Pharmacy</span>
       </div>
 
       <!-- Search -->
@@ -33,9 +33,9 @@
 
         <router-link to="/cart" class="flex items-center gap-2">
           <div
-            class="icon-hover group relative flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-500 text-white bg-opacity-15 border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60 cursor-pointer transition group">
+            class="icon-hover group relative flex items-center gap-2 px-2 py-1 rounded text-violet-600 hover:text-violet-700 hover:bg-violet-50 cursor-pointer transition hover:shadow-md">
             <a-badge :size="'small'" :count="cartStore.cartCount" class="animate-pulse">
-              <i class="pi pi-shopping-cart text-lg" style="color: #fff;"></i>
+              <i class="pi pi-shopping-cart text-lg text-violet-600 hover:text-violet-700"></i>
             </a-badge>
             <span class="text-sm md:text-base font-semibold">Giỏ hàng</span>
           </div>
@@ -43,7 +43,7 @@
 
         <a-dropdown :placement="'bottom'" :arrow="{ pointAtCenter: true }">
           <div @click="openAuthDialog"
-            class="flex items-center gap-2 px-3 py-1 rounded-lg bg-violet-500 bg-opacity-15 text-white border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60 cursor-pointer transition group">
+            class="flex items-center gap-2 px-2 py-1 rounded text-violet-600 hover:text-violet-700 hover:bg-violet-50 cursor-pointer transition hover:shadow-md">
             <i class="pi pi-user text-lg"></i>
             <span class="text-sm md:text-base font-semibold">
               {{ userStore.isLogin ? userStore.username : "Đăng nhập" }}
@@ -152,13 +152,13 @@ onMounted(() => {
 
 <style scoped>
 .header-gradient {
-  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 50%, #c4b5fd 100%);
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .search-input :deep(.ant-input-affix-wrapper) {
   background: rgba(255, 255, 255, 0.95);
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(167, 139, 250, 0.5);
   border-radius: 8px;
   padding: 8px 12px;
   transition: all 0.3s ease;
@@ -167,13 +167,13 @@ onMounted(() => {
 .search-input :deep(.ant-input-affix-wrapper:hover),
 .search-input :deep(.ant-input-affix-wrapper:focus-within) {
   background: rgba(255, 255, 255, 1);
-  border-color: #8b5cf6;
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+  border-color: rgba(167, 139, 250, 0.8);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.3);
 }
 
 .search-input :deep(.ant-select-selector) {
   background: rgba(255, 255, 255, 0.95) !important;
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  border: 1px solid rgba(167, 139, 250, 0.5) !important;
   border-radius: 8px !important;
   padding: 8px 12px !important;
   transition: all 0.3s ease !important;
@@ -182,8 +182,8 @@ onMounted(() => {
 .search-input :deep(.ant-select-selector:hover),
 .search-input :deep(.ant-select-focused .ant-select-selector) {
   background: rgba(255, 255, 255, 1) !important;
-  border-color: #8b5cf6 !important;
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.3) !important;
+  border-color: rgba(167, 139, 250, 0.8) !important;
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.3) !important;
 }
 
 .search-input :deep(.ant-input) {
@@ -196,16 +196,16 @@ onMounted(() => {
 }
 
 .search-input :deep(.ant-input-search-button) {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  background: #a78bfa;
+  border-color: #a78bfa;
   color: white;
   font-weight: 600;
   border-radius: 6px;
 }
 
 .search-input :deep(.ant-input-search-button:hover) {
-  background: #7c3aed;
-  border-color: #7c3aed;
+  background: #c4b5fd;
+  border-color: #c4b5fd;
 }
 
 .icon-hover {
