@@ -3,7 +3,7 @@
         <div style="background-color: #edf0f3;">
             <Header />
             <Navbar :categories="categories" />
-            <div class="py-3 w-6xl mr-auto ml-auto">
+            <div class="py-3 w-7xl mr-auto ml-auto">
                 <router-view></router-view>
             </div>
             <<Footer />

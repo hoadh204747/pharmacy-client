@@ -1,59 +1,49 @@
 <template>
     <div @click="() => router.push({ name: 'product-detail', params: { id: data.id } })"
-        class="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full cursor-pointer hover:border-purple-300">
+        class="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-200 flex flex-col h-full cursor-pointer">
 
         <!-- Image Container -->
-        <div class="relative w-full aspect-square overflow-hidden bg-gray-50">
-            <img class="object-cover w-full h-full transition-transform duration-300 group-hover:scale-110"
+        <div class="relative w-full aspect-square overflow-hidden bg-white">
+            <img class="object-contain w-full h-full p-3 transition-transform duration-300 group-hover:scale-105"
                 :src="data.imageUrl[0]" alt="Product" />
 
-            <!-- Sale Badge -->
+            <!-- Sale Badge (top-left) -->
             <div v-if="data.discount > 0"
-                class="absolute top-3 right-3 bg-gradient-to-r from-red-500 to-red-600 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                class="absolute top-3 left-3 bg-red-500 text-white px-2 py-0.5 rounded-md text-xs font-bold shadow-sm">
                 -{{ data.discount }}%
-            </div>
-
-            <!-- Stock Status -->
-            <div
-                class="absolute bottom-3 left-3 flex items-center gap-1 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
-                <i class="pi pi-check text-sm"></i>
-                <span>Có sẵn</span>
             </div>
         </div>
 
         <!-- Content -->
-        <div class="p-4 flex-1 flex flex-col justify-between">
+        <div class="p-3 flex-1 flex flex-col justify-between">
             <!-- Product Name -->
             <div>
                 <a-tooltip>
                     <template #title>
                         {{ data.name }}
                     </template>
-                    <h3
-                        class="text-sm font-semibold text-gray-800 line-clamp-2 h-10 group-hover:text-purple-600 transition">
+                    <h3 class="text-sm font-medium text-gray-900 line-clamp-2 h-9">
                         {{ data.name }}
                     </h3>
                 </a-tooltip>
             </div>
 
-            <!-- Price Section -->
-            <div class="mt-3 mb-4">
-                <div class="flex items-baseline gap-2">
-                    <span class="text-lg font-bold text-red-600">
+            <!-- Price + Cart -->
+            <div class="mt-2 flex items-center justify-between">
+                <div>
+                    <div class="text-lg font-bold text-purple-500">
                         {{ formatPrice(data.price - (data.price * data.discount / 100)) }} đ
-                    </span>
-                    <span v-if="data.discount > 0" class="text-sm text-gray-400 line-through">
+                    </div>
+                    <div v-if="data.discount > 0" class="text-xs text-gray-400 line-through">
                         {{ formatPrice(data.price) }} đ
-                    </span>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Add to Cart Button -->
-            <button @click.stop="addToCart"
-                class="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold py-2 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
-                <i class="pi pi-shopping-cart text-sm"></i>
-                <span>Thêm vào giỏ</span>
-            </button>
+                <button @click.stop="addToCart"
+                    class="p-2 rounded-md border border-purple-200 text-purple-500 hover:bg-purple-500 hover:text-white transition">
+                    <i class="pi pi-shopping-cart text-sm"></i>
+                </button>
+            </div>
         </div>
     </div>
 </template>

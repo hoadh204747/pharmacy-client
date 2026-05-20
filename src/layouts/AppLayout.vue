@@ -8,7 +8,7 @@
             <Banner />
             <!-- <CarouselCategory /> -->
             <!-- <FlashSale /> -->
-            <div class="py-3 w-6xl mr-auto ml-auto bg-fuchsia-100 my-6 rounded-lg">
+            <div class="py-3 w-7xl mr-auto ml-auto my-6">
                 <router-view></router-view>
             </div>
             <Footer />
